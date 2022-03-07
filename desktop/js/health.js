@@ -16,16 +16,6 @@
 
 "use strict"
 
-if (!jeeFrontEnd.health) {
-  jeeFrontEnd.health = {
-    init: function() {
-      window.jeeP = this
-    }
-  }
-}
-
-jeeFrontEnd.health.init()
-
 $('.bt_configurationPlugin').on('click', function() {
   $('#md_modal').dialog({
     title: "{{Configuration du plugin}}"

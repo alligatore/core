@@ -132,3 +132,7 @@ $('#bt_removeAll').on('click', function() {
     }
   })
 })
+
+function setChartOptions(_chartId) {
+  jeedom.history.chart[_chartId].chart.redraw()
+}

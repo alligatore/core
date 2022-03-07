@@ -16,7 +16,7 @@ At the opening of the page, if this verification is more than two hours old, Jee
 You can also use the button **Check for updates** To do it manually.
 If you want to perform a manual check, you can press the button "Check for updates".
 
-The button **To safeguard** is to be used when you change the options in the table below, to specify not to update certain plugins if necessary.
+The button **Save** is to be used when you change the options in the table below, to specify not to update certain plugins if necessary.
 
 ## Update the Core
 
@@ -45,7 +45,7 @@ The table contains the versions of the Core and installed plugins.
 The plugins have a badge next to their name, specifying their version, green in color *stable*, or orange in *beta* Or other.
 
 - **Status** : OK or NOK.
-- **Name** : Name and origin of the plugin
+- **Last name** : Name and origin of the plugin
 - **Version** : Indicates the precise version of the Core or plugin.
 - **Options** : Check this box if you do not want this plugin to be updated during the global update (Button **Update**).
 

@@ -16,133 +16,6 @@
 
 "use strict"
 
-if (!jeeFrontEnd.view) {
-  jeeFrontEnd.view = {
-    init: function() {
-      window.jeeP = this
-    },
-    fullScreen: function(_mode) {
-      if (_mode) {
-        $('header').hide()
-        $('footer').hide()
-        $('#div_mainContainer').css('margin-top', '-50px')
-        $('#backgroundforJeedom').css({
-          'margin-top': '-50px',
-          'height': '100%'
-        })
-        $('#wrap').css('margin-bottom', '0px')
-        $('.div_displayView').height($('html').height() - 5)
-        $('.div_displayViewContainer').height($('html').height() - 5)
-        $('.bt_hideFullScreen').hide()
-      } else {
-        $('header').show()
-        $('footer').show()
-        $('#div_mainContainer').css('margin-top', '0px')
-        $('#backgroundforJeedom').css({
-          'margin-top': '0px',
-          'height': 'calc(100% - 50px)'
-        })
-        $('#wrap').css('margin-bottom', '15px')
-        $('.div_displayView').height($('body').height())
-        $('.div_displayViewContainer').height($('body').height())
-        $('.bt_hideFullScreen').show()
-      }
-    },
-    editWidgetMode: function(_mode, _save) {
-      if (!isset(_mode)) {
-        if ($('#bt_editViewWidgetOrder').attr('data-mode') != undefined && $('#bt_editViewWidgetOrder').attr('data-mode') == 1) {
-          this.editWidgetMode(0, false)
-          this.editWidgetMode(1, false)
-        }
-        return
-      }
-      var divEquipements = $('.div_displayView')
-      if (_mode == 0 || _mode == '0') {
-        jeeFrontEnd.modifyWithoutSave = false
-        jeedomUI.isEditing = false
-        jeedom.cmd.disableExecute = false
-
-        divEquipements.find('.editingMode.allowResize').resizable('destroy')
-        divEquipements.find('.editingMode').draggable('disable').removeClass('editingMode', '').removeAttr('data-editId')
-        divEquipements.find('.cmd.editOptions').remove()
-
-        if (!isset(_save) || _save) {
-          jeedomUI.saveWidgetDisplay({
-            view: 1
-          })
-        }
-      } else {
-        jeedomUI.isEditing = true
-        jeedom.cmd.disableExecute = true
-        $('.eqLogic-widget, .scenario-widget').addClass('editingMode')
-
-        //show orders:
-        var value
-        $('.jeedomAlreadyPosition.ui-draggable').each(function() {
-          value = $(this).attr('data-vieworder')
-          if ($(this).find(".counterReorderJeedom").length) {
-            $(this).find(".counterReorderJeedom").text(value)
-          } else {
-            $(this).prepend('<span class="counterReorderJeedom pull-left">' + value + '</span>')
-          }
-        })
-
-        //set unique id whatever we have:
-        divEquipements.find('.eqLogic-widget, .scenario-widget').each(function(index) {
-          $(this).addClass('editingMode')
-            .attr('data-editId', index)
-            .append('<span class="cmd editOptions cursor"></span>')
-        })
-
-        //set draggables:
-        divEquipements.find('.editingMode').draggable({
-          disabled: false,
-          distance: 10,
-          start: function(event, ui) {
-            jeeFrontEnd.modifyWithoutSave = true
-            jeedomUI.draggingId = $(this).attr('data-editId')
-            jeedomUI.orders = {}
-            $(this).parent().find('.ui-draggable').each(function(i, itemElem) {
-              jeedomUI.orders[jeedomUI.draggingId] = parseInt($(this).attr('data-vieworder'))
-            })
-          }
-        })
-        //set resizables:
-        $('.eqLogicZone .eqLogic-widget.allowResize').resizable({
-          grid: [2, 2],
-          start: function(event, ui) {
-            jeeFrontEnd.modifyWithoutSave = true
-          },
-          resize: function(event, ui) {
-            jeedomUtils.positionEqLogic(ui.element.attr('data-eqlogic_id'), false)
-            ui.element.closest('.eqLogicZone').packery()
-          },
-          stop: function(event, ui) {
-            jeedomUtils.positionEqLogic(ui.element.attr('data-eqlogic_id'), false)
-            ui.element.closest('.eqLogicZone').packery()
-          }
-        })
-        $('.eqLogicZone .scenario-widget.allowResize').resizable({
-          grid: [2, 2],
-          start: function(event, ui) {
-            jeeFrontEnd.modifyWithoutSave = true
-          },
-          resize: function(event, ui) {
-            jeedomUtils.positionEqLogic(ui.element.attr('data-scenario_id'), false, true)
-            ui.element.closest('.eqLogicZone').packery()
-          },
-          stop: function(event, ui) {
-            jeedomUtils.positionEqLogic(ui.element.attr('data-scenario_id'), false, true)
-            ui.element.closest('.eqLogicZone').packery()
-          }
-        })
-      }
-    },
-  }
-}
-
-jeeFrontEnd.view.init()
-
 $(function() {
   setTimeout(function() {
     $('input', 'textarea', 'select').click(function() {
@@ -155,6 +28,8 @@ $(function() {
   jeedomUI.setHistoryModalHandler()
 })
 
+var modifyWithoutSave = false
+
 $('#div_pageContainer').on('click', '.bt_gotoViewZone', function() {
   var ptop = $('.div_displayViewContainer').scrollTop() + $('.lg_viewZone[data-zone_id=' + $(this).attr('data-zone_id') + ']').offset().top - 60
   $('.div_displayViewContainer').animate({
@@ -162,26 +37,54 @@ $('#div_pageContainer').on('click', '.bt_gotoViewZone', function() {
   }, 500)
 })
 
+function fullScreen(_mode) {
+  if (_mode) {
+    $('header').hide()
+    $('footer').hide()
+    $('#div_mainContainer').css('margin-top', '-50px')
+    $('#backgroundforJeedom').css({
+      'margin-top': '-50px',
+      'height': '100%'
+    })
+    $('#wrap').css('margin-bottom', '0px')
+    $('.div_displayView').height($('html').height() - 5)
+    $('.div_displayViewContainer').height($('html').height() - 5)
+    $('.bt_hideFullScreen').hide()
+  } else {
+    $('header').show()
+    $('footer').show()
+    $('#div_mainContainer').css('margin-top', '0px')
+    $('#backgroundforJeedom').css({
+      'margin-top': '0px',
+      'height': 'calc(100% - 50px)'
+    })
+    $('#wrap').css('margin-bottom', '15px')
+    $('.div_displayView').height($('body').height())
+    $('.div_displayViewContainer').height($('body').height())
+    $('.bt_hideFullScreen').show()
+  }
+}
+
 $('#bt_editViewWidgetOrder').off('click').on('click', function() {
   if ($(this).attr('data-mode') == 1) {
     $('#md_modal').dialog('close')
     $.hideAlert()
     $(this).attr('data-mode', 0)
     $('.counterReorderJeedom').remove()
-    jeeP.editWidgetMode(0)
+    editWidgetMode(0)
   } else {
     $.fn.showAlert({
       message: "{{Vous êtes en mode édition. Vous pouvez déplacer les tuiles, les redimensionner,  et éditer les commandes (ordre, widget) avec le bouton à droite du titre.}}",
       level: 'info'
     })
     $(this).attr('data-mode', 1)
-    jeeP.editWidgetMode(1)
+    editWidgetMode(1)
   }
 })
 
-if (jeephp2js.view_id != '') {
+if (view_id != '') {
   jeedom.view.toHtml({
-    id: jeephp2js.view_id,
+    id: view_id,
     version: 'dashboard',
     useCache: true,
     error: function(error) {
@@ -241,7 +144,7 @@ if (jeephp2js.view_id != '') {
           $('.eqLogic-widget, .scenario-widget').addClass('displayObjectName')
         }
         if (getUrlVars('fullscreen') == 1) {
-          jeeP.fullScreen(true)
+          fullScreen(true)
         }
       }, 10)
 
@@ -292,4 +195,95 @@ $('#div_pageContainer').on({
     }).load('index.php?v=d&modal=eqLogic.dashboard.edit&eqLogic_id=' + eqId).dialog('open')
   }
 }, '.editOptions')
+
+function editWidgetMode(_mode, _save) {
+  if (!isset(_mode)) {
+    if ($('#bt_editViewWidgetOrder').attr('data-mode') != undefined && $('#bt_editViewWidgetOrder').attr('data-mode') == 1) {
+      editWidgetMode(0, false)
+      editWidgetMode(1, false)
+    }
+    return
+  }
+  var divEquipements = $('.div_displayView')
+  if (_mode == 0 || _mode == '0') {
+    modifyWithoutSave = false
+    jeedomUI.isEditing = false
+    jeedom.cmd.disableExecute = false
+
+    divEquipements.find('.editingMode.allowResize').resizable('destroy')
+    divEquipements.find('.editingMode').draggable('disable').removeClass('editingMode', '').removeAttr('data-editId')
+    divEquipements.find('.cmd.editOptions').remove()
+
+    if (!isset(_save) || _save) {
+      jeedomUI.saveWidgetDisplay({
+        view: 1
+      })
+    }
+  } else {
+    jeedomUI.isEditing = true
+    jeedom.cmd.disableExecute = true
+    $('.eqLogic-widget, .scenario-widget').addClass('editingMode')
+
+    //show orders:
+    var value
+    $('.jeedomAlreadyPosition.ui-draggable').each(function() {
+      value = $(this).attr('data-vieworder')
+      if ($(this).find(".counterReorderJeedom").length) {
+        $(this).find(".counterReorderJeedom").text(value)
+      } else {
+        $(this).prepend('<span class="counterReorderJeedom pull-left">' + value + '</span>')
+      }
+    })
+
+    //set unique id whatever we have:
+    divEquipements.find('.eqLogic-widget, .scenario-widget').each(function(index) {
+      $(this).addClass('editingMode')
+        .attr('data-editId', index)
+        .append('<span class="cmd editOptions cursor"></span>')
+    })
+
+    //set draggables:
+    divEquipements.find('.editingMode').draggable({
+      disabled: false,
+      distance: 10,
+      start: function(event, ui) {
+        modifyWithoutSave = true
+        jeedomUI.draggingId = $(this).attr('data-editId')
+        jeedomUI.orders = {}
+        $(this).parent().find('.ui-draggable').each(function(i, itemElem) {
+          jeedomUI.orders[jeedomUI.draggingId] = parseInt($(this).attr('data-vieworder'))
+        })
+      }
+    })
+    //set resizables:
+    $('.eqLogicZone .eqLogic-widget.allowResize').resizable({
+      grid: [2, 2],
+      start: function(event, ui) {
+        modifyWithoutSave = true
+      },
+      resize: function(event, ui) {
+        jeedomUtils.positionEqLogic(ui.element.attr('data-eqlogic_id'), false)
+        ui.element.closest('.eqLogicZone').packery()
+      },
+      stop: function(event, ui) {
+        jeedomUtils.positionEqLogic(ui.element.attr('data-eqlogic_id'), false)
+        ui.element.closest('.eqLogicZone').packery()
+      }
+    })
+    $('.eqLogicZone .scenario-widget.allowResize').resizable({
+      grid: [2, 2],
+      start: function(event, ui) {
+        modifyWithoutSave = true
+      },
+      resize: function(event, ui) {
+        jeedomUtils.positionEqLogic(ui.element.attr('data-scenario_id'), false, true)
+        ui.element.closest('.eqLogicZone').packery()
+      },
+      stop: function(event, ui) {
+        jeedomUtils.positionEqLogic(ui.element.attr('data-scenario_id'), false, true)
+        ui.element.closest('.eqLogicZone').packery()
+      }
+    })
+  }
+}
 

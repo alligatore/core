@@ -185,4 +185,3 @@ jeedom.update.number = function(_params) {
     };
     $.ajax(paramsAJAX);
 }
-  

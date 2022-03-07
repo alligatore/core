@@ -16,106 +16,6 @@
 
 "use strict"
 
-if (!jeeFrontEnd.types) {
-  jeeFrontEnd.types = {
-    init: function() {
-      window.jeeP = this
-      this.generics = jeephp2js.generics
-      this.gen_families = jeephp2js.gen_families
-      this.genericsByFamily = {}
-      for (var i in this.gen_families) {
-        this.genericsByFamily[this.gen_families[i]] = {}
-      }
-    },
-    setFamiliesNumber: function() {
-      var ul
-      $('span.spanNumber').each(function() {
-        ul = $(this).closest('.eqlogicSortable').find('ul.eqLogicSortable')
-        $(this).text(' (' + ul.find('li.eqLogic').length + ')')
-      })
-    },
-    setQueryButtons: function() {
-      $('div.eqlogicSortable').each(function() {
-        if (!Object.keys(jeeP.gen_families).includes($(this).attr('data-id'))) {
-          $(this).find('.bt_queryCmdsTypes').addClass('hidden')
-        } else {
-          $(this).find('.bt_queryCmdsTypes').removeClass('hidden')
-        }
-
-      })
-    },
-    getSelectCmd: function(_family='', _type, _subtype, _none=true) {
-      var htmlSelect = '<select class="modalCmdGenericSelect input-xs">'
-      if (_none) htmlSelect += '<option value="">{{Aucun}}</option>'
-      for (var group in this.genericsByFamily) {
-        if (_family != '' && group != _family) continue
-          for (var i in this.genericsByFamily[group]) {
-            if (this.genericsByFamily[group][i].type.toLowerCase() == _type.toLowerCase() && (this.genericsByFamily[group][i].subtype.includes(_subtype) || this.genericsByFamily[group][i].subtype.length == 0) ) {
-              htmlSelect += '<option value="' + this.genericsByFamily[group][i].genkey + '">' + this.genericsByFamily[group][i].name + '</option>'
-            }
-          }
-        }
-        htmlSelect += '</select>'
-        return htmlSelect
-    },
-    levenshteinDistance: function(str1='', str2='') {
-       const track = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null))
-       for (let i = 0; i <= str1.length; i += 1) {
-          track[0][i] = i
-       }
-       for (let j = 0; j <= str2.length; j += 1) {
-          track[j][0] = j
-       }
-       for (let j = 1; j <= str2.length; j += 1) {
-          for (let i = 1; i <= str1.length; i += 1) {
-             const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1
-             track[j][i] = Math.min(
-                track[j][i - 1] + 1, // deletion
-                track[j - 1][i] + 1, // insertion
-                track[j - 1][i - 1] + indicator, // substitution
-             )
-          }
-       }
-       return track[str2.length][str1.length];
-    },
-    compareGenericName: function(a, b) {
-      if ( a.name < b.name ){
-        return -1;
-      }
-      if ( a.name > b.name ){
-        return 1;
-      }
-      return 0;
-    }
-  }
-}
-
-jeeFrontEnd.types.init()
-
-$(function() {
-  jeeP.setQueryButtons()
-
-  $("#md_applyCmdsTypes").dialog({
-    closeText: '',
-    autoOpen: false,
-    modal: true,
-    width: 'calc(80% - 200px)',
-    height: 'auto',
-    open: function() {
-      $(this).parent().css({
-        'top': 120
-      })
-      $(this).css('max-height', $(document).height() - 250)
-    },
-    beforeClose: function(event, ui) {
-      $('#md_applyCmdsTypes .maincontainer').empty()
-      $('#bt_applyCmdsTypes').show()
-    }
-  })
-
-  $('#md_applyCmdsTypes').removeClass('hidden')
-})
-
 //searching:
 $('#in_searchTypes').on('keyup', function() {
   try {
@@ -181,6 +81,7 @@ $('#bt_closeAll').off('click').on('click', function(event) {
 })
 
 //Sorting:
+var sortFromGenericId
 $('.eqLogicSortable').sortable({
   cursor: "move",
   connectWith: ".eqLogicSortable",
@@ -194,7 +95,7 @@ $('.eqLogicSortable').sortable({
         $(this).appendTo(ui.item)
       }
     })
-    jeeP.sortFromGenericId = ui.item.closest('.eqlogicSortable').attr('data-id')
+    sortFromGenericId = ui.item.closest('.eqlogicSortable').attr('data-id')
   },
   stop: function(event, ui) {
     var genericId = ui.item.closest('.eqlogicSortable').attr('data-id')
@@ -215,7 +116,7 @@ $('.eqLogicSortable').sortable({
     })
 
     //reset types on commands ?
-    if (jeeP.sortFromGenericId != genericId && genericId == '') {
+    if (sortFromGenericId != genericId && genericId == '') {
       bootbox.confirm({
         message: "{{Supprimer les types generiques sur les commandes ?}}",
         buttons: {
@@ -245,24 +146,15 @@ $('.eqLogicSortable').sortable({
     event.stopPropagation()
     $('.cb_selEqLogic').prop("checked", false)
 
-    jeeP.setFamiliesNumber()
-    jeeP.setQueryButtons()
-    jeeFrontEnd.modifyWithoutSave = true
+    setFamiliesNumber()
+    setQueryButtons()
+    modifyWithoutSave = true
   }
 }).disableSelection()
-
-
-//Handle auto hide context menu
-$('#div_pageContainer').on({
-  'mouseleave': function(event) {
-    $(this).fadeOut().trigger('contextmenu:hide')
-  }
-}, '.context-menu-root')
 
 //Contextmenu Equipments:
 $.contextMenu({
   selector: "li.eqLogic",
-  appendTo: 'div#div_pageContainer',
   build: function($trigger) {
     $trigger.addClass('hover')
     var eqGeneric = $trigger.closest('.eqlogicSortable').attr('data-id')
@@ -276,9 +168,9 @@ $.contextMenu({
 
     var contextmenuitems = {}
     contextmenuitems['none'] = {'name': '{{Aucun}}', 'id': 'none'}
-    for (var group in jeeP.gen_families) {
+    for (var group in gen_families) {
       contextmenuitems[group] = {
-        'name': jeeP.gen_families[group],
+        'name': gen_families[group],
         'id': group
       }
     }
@@ -293,9 +185,9 @@ $.contextMenu({
             'data-changed': '1'
           }).appendTo($('#gen_' + dataGeneric + ' ul.eqLogicSortable'))
         }
-        jeeP.setFamiliesNumber()
-        jeeP.setQueryButtons()
-        jeeFrontEnd.modifyWithoutSave = true
+        setFamiliesNumber()
+        setQueryButtons()
+        modifyWithoutSave = true
       },
       items: contextmenuitems
     }
@@ -308,22 +200,25 @@ $.contextMenu({
 })
 
 //Contextmenu commands:
-Object.keys(jeeP.genericsByFamily).forEach(key => {
-  Object.keys(jeeP.generics).forEach(genkey => {
-    if (jeeP.generics[genkey].family == key) {
-      jeeP.genericsByFamily[key][genkey] = {}
-      jeeP.genericsByFamily[key][genkey]['genkey'] = genkey
-      jeeP.genericsByFamily[key][genkey]['name'] = jeeP.generics[genkey].name
-      jeeP.genericsByFamily[key][genkey]['shortName'] = jeeP.generics[genkey].name.replace(key, '').toLowerCase().trim()
-      jeeP.genericsByFamily[key][genkey]['type'] = jeeP.generics[genkey].type
-      jeeP.genericsByFamily[key][genkey]['subtype'] = jeeP.generics[genkey].subtype == undefined ? [] : jeeP.generics[genkey].subtype
-      //jeeP.genericsByFamily[key][genkey]['comment'] = generics[genkey].comment == undefined ? '' : generics[genkey].comment
+var genericsByFamily = {}
+for (var i in gen_families) {
+  genericsByFamily[gen_families[i]] = {}
+}
+Object.keys(genericsByFamily).forEach(key => {
+  Object.keys(generics).forEach(genkey => {
+    if (generics[genkey].family == key) {
+      genericsByFamily[key][genkey] = {}
+      genericsByFamily[key][genkey]['genkey'] = genkey
+      genericsByFamily[key][genkey]['name'] = generics[genkey].name
+      genericsByFamily[key][genkey]['shortName'] = generics[genkey].name.replace(key, '').toLowerCase().trim()
+      genericsByFamily[key][genkey]['type'] = generics[genkey].type
+      genericsByFamily[key][genkey]['subtype'] = generics[genkey].subtype == undefined ? [] : generics[genkey].subtype
+      //genericsByFamily[key][genkey]['comment'] = generics[genkey].comment == undefined ? '' : generics[genkey].comment
     }
   })
 })
 $.contextMenu({
   selector: "li.cmd",
-  appendTo: 'div#div_pageContainer',
   build: function($trigger) {
     $trigger.addClass('hover')
     var eqGeneric = $trigger.closest('.eqlogicSortable').attr('data-id')
@@ -337,21 +232,21 @@ $.contextMenu({
 
     var items
     var uniqId = 0
-    for (var group in jeeP.genericsByFamily) {
+    for (var group in genericsByFamily) {
       items = {}
-      for (var i in jeeP.genericsByFamily[group]) {
-        if (jeeP.genericsByFamily[group][i].type.toLowerCase() == cmdType.toLowerCase() && (jeeP.genericsByFamily[group][i].subtype.includes(cmdSubType) || jeeP.genericsByFamily[group][i].subtype.length == 0) ) {
+      for (var i in genericsByFamily[group]) {
+        if (genericsByFamily[group][i].type.toLowerCase() == cmdType.toLowerCase() && (genericsByFamily[group][i].subtype.includes(cmdSubType) || genericsByFamily[group][i].subtype.length == 0) ) {
           items[uniqId] = {
-            //'name': '<span title="'+jeeP.genericsByFamily[group][i].comment+'">'+jeeP.genericsByFamily[group][i].name+'</span>',
-            'name': jeeP.genericsByFamily[group][i].name,
-            'id': group + '::' + jeeP.genericsByFamily[group][i].genkey,
+            //'name': '<span title="'+genericsByFamily[group][i].comment+'">'+genericsByFamily[group][i].name+'</span>',
+            'name': genericsByFamily[group][i].name,
+            'id': group + '::' + genericsByFamily[group][i].genkey,
             //'isHtmlName': true
           }
           uniqId++
         }
       }
       if (Object.keys(items).length > 0) {
-        if (group == jeeP.gen_families[eqGeneric]) {
+        if (group == gen_families[eqGeneric]) {
           group = "<b>" + group + "</b>"
         }
         contextmenuitems[group] = {
@@ -368,13 +263,13 @@ $.contextMenu({
           $('li.cmd[data-id="' + cmdId + '"] .genericType').text('None')
           $('li.cmd[data-id="' + cmdId + '"]').attr('data-generic', '')
         } else {
-          //var text = options.commands[key].id.split('::')[0] + jeephp2js.typeStringSep + options.commands[key].$node[0].innerText
-          var text = options.commands[key].id.split('::')[0] + jeephp2js.typeStringSep + options.commands[key].name
+          //var text = options.commands[key].id.split('::')[0] + typeStringSep + options.commands[key].$node[0].innerText
+          var text = options.commands[key].id.split('::')[0] + typeStringSep + options.commands[key].name
           $('li.cmd[data-id="' + cmdId + '"] .genericType').text(text)
           $('li.cmd[data-id="' + cmdId + '"]').attr('data-generic', options.commands[key].id.split('::')[1])
         }
         $('li.cmd[data-id="' + cmdId + '"]').attr('data-changed', '1')
-        jeeFrontEnd.modifyWithoutSave = true
+        modifyWithoutSave = true
       },
       items: contextmenuitems
     }
@@ -413,13 +308,13 @@ $('.bt_resetCmdsTypes').on('click', function(event) {
       'data-changed': '1'
     }).find('.genericType').text('None')
   })
-  jeeFrontEnd.modifyWithoutSave = true
+  modifyWithoutSave = true
 })
 
 //Auto apply
 $('.bt_queryCmdsTypes').off('click').on('click', function() {
   var genFamilyId = $(this).closest('div.eqlogicSortable').attr('data-id')
-  var genFamily = jeeP.gen_families[genFamilyId]
+  var genFamily = gen_families[genFamilyId]
 
   //Get selected eqLogics and all their cmd data:
   var queryEqIds = {}
@@ -438,7 +333,7 @@ $('.bt_queryCmdsTypes').off('click').on('click', function() {
       cmd['type'] = $(this).attr('data-type')
       cmd['subtype'] = $(this).attr('data-subtype')
       cmd['generic'] = $(this).attr('data-generic')
-      cmd['genericName'] = $(this).find('.genericType').text().replace(genFamily + jeephp2js.typeStringSep, '')
+      cmd['genericName'] = $(this).find('.genericType').text().replace(genFamily + typeStringSep, '')
       cmd['queryGeneric'] = ''
       cmd['queryGenericName'] = ''
       cmd['possibilities'] = []
@@ -448,8 +343,8 @@ $('.bt_queryCmdsTypes').off('click').on('click', function() {
 
   //Iterate for each generic in this family, each eqLogic selected, each eqLogic commands:
   var thisGen, thisCmd
-  Object.keys(jeeP.genericsByFamily[genFamily]).forEach(key => {
-    thisGen = jeeP.genericsByFamily[genFamily][key]
+  Object.keys(genericsByFamily[genFamily]).forEach(key => {
+    thisGen = genericsByFamily[genFamily][key]
     for (var _id in queryEqIds) {
       for (var _cmd in queryEqIds[_id].cmds) {
         thisCmd = queryEqIds[_id].cmds[_cmd]
@@ -487,7 +382,7 @@ $('.bt_queryCmdsTypes').off('click').on('click', function() {
           match = true
         else if (thisPoss.shortName.includes(thisCmd.name))
           match = true
-        else if (jeeP.levenshteinDistance(thisPoss.shortName, thisCmd.name) < (thisCmd.name.length / 2) +1)
+        else if (levenshteinDistance(thisPoss.shortName, thisCmd.name) < (thisCmd.name.length / 2) +1)
           match = true
 
         if (match) {
@@ -521,7 +416,7 @@ $('.bt_queryCmdsTypes').off('click').on('click', function() {
       inner += '<label class="col-xs-2">' + cmdName + '</label>'
       inner += '<span class="col-xs-3 ' + thisClass + '">' + thisCmd.genericName + '</span>'
 
-      select = jeeP.getSelectCmd(genFamily, thisCmd.type, thisCmd.subtype)
+      select = getSelectCmd(genFamily, thisCmd.type, thisCmd.subtype)
       select = select.replace('<option value="' + thisCmd.queryGeneric + '">', '<option selected value="' + thisCmd.queryGeneric + '">')
 
       inner += '<div class="col-xs-6">' + select + '</div>'
@@ -553,17 +448,72 @@ $('#bt_applyCmdsTypes').off('click').on('click', function() {
     queryEq = $(this)
     if ($(this).find('.cb_selCmd').is(':checked')) {
       genericName = $(this).find('.modalCmdGenericSelect option:selected').text()
-      if (genericName != '{{Aucun}}') genericName = genFamilyId + jeephp2js.typeStringSep + genericName
+      if (genericName != '{{Aucun}}') genericName = genFamilyId + typeStringSep + genericName
       $('div.eqlogicSortable[data-id="' + genFamilyId + '"] li.cmd[data-id="' + $(this).attr('data-id') + '"]').attr({
         'data-changed': '1',
         'data-generic': $(this).find('.modalCmdGenericSelect').val()
       }).find('span.genericType').text(genericName)
-      jeeFrontEnd.modifyWithoutSave = true
+      modifyWithoutSave = true
     }
   })
 
   $("#md_applyCmdsTypes").dialog('close')
 })
+
+function setFamiliesNumber() {
+  var ul
+  $('span.spanNumber').each(function() {
+    ul = $(this).closest('.eqlogicSortable').find('ul.eqLogicSortable')
+    $(this).text(' (' + ul.find('li.eqLogic').length + ')')
+  })
+}
+
+function setQueryButtons() {
+  $('div.eqlogicSortable').each(function() {
+    if (!Object.keys(gen_families).includes($(this).attr('data-id'))) {
+      $(this).find('.bt_queryCmdsTypes').addClass('hidden')
+    } else {
+      $(this).find('.bt_queryCmdsTypes').removeClass('hidden')
+    }
+
+  })
+}
+
+function getSelectCmd(_family='', _type, _subtype, _none=true) {
+  var htmlSelect = '<select class="modalCmdGenericSelect input-xs">'
+  if (_none) htmlSelect += '<option value="">{{Aucun}}</option>'
+  for (var group in genericsByFamily) {
+    if (_family != '' && group != _family) continue
+      for (var i in genericsByFamily[group]) {
+        if (genericsByFamily[group][i].type.toLowerCase() == _type.toLowerCase() && (genericsByFamily[group][i].subtype.includes(_subtype) || genericsByFamily[group][i].subtype.length == 0) ) {
+          htmlSelect += '<option value="' + genericsByFamily[group][i].genkey + '">' + genericsByFamily[group][i].name + '</option>'
+        }
+      }
+    }
+    htmlSelect += '</select>'
+    return htmlSelect
+}
+
+function levenshteinDistance(str1='', str2='') {
+   const track = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null))
+   for (let i = 0; i <= str1.length; i += 1) {
+      track[0][i] = i
+   }
+   for (let j = 0; j <= str2.length; j += 1) {
+      track[j][0] = j
+   }
+   for (let j = 1; j <= str2.length; j += 1) {
+      for (let i = 1; i <= str1.length; i += 1) {
+         const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1
+         track[j][i] = Math.min(
+            track[j][i - 1] + 1, // deletion
+            track[j - 1][i] + 1, // insertion
+            track[j - 1][i - 1] + indicator, // substitution
+         )
+      }
+   }
+   return track[str2.length][str1.length];
+}
 
 $("#bt_saveGenericTypes").off('click').on('click', function(event) {
   //save eqLogics:
@@ -627,7 +577,7 @@ $("#bt_saveGenericTypes").off('click').on('click', function(event) {
   $('li.eqLogic, li.cmd').each(function() {
     $(this).attr('data-changed', '0')
   })
-  jeeFrontEnd.modifyWithoutSave = false
+  modifyWithoutSave = false
 
   $.fn.showAlert({
     message: '{{Types Génériques sauvegardés}}' + ' (equipment: ' + eqLogics.length + ' | command: ' + cmds.length + ')',
@@ -647,11 +597,11 @@ $('#bt_listGenericTypes').off('click').on('click', function() {
   inner += '<td>{{Générique}}</td><td>{{Nom}}</td><td>{{Type}}</td><td>{{Sous type}}</td>'
 
   var family, familyName, generics, generic, infos, actions
-  for (var familyId in jeeP.gen_families) {
+  for (var familyId in gen_families) {
     infos = []
     actions = []
-    family = jeeP.gen_families[familyId]
-    generics = jeeP.genericsByFamily[family]
+    family = gen_families[familyId]
+    generics = genericsByFamily[family]
     inner += '<tr class="center"><td colspan=5><legend>' + family + ' (id: ' + familyId + ')</legend></td></tr>'
 
     //seperate to infos first
@@ -665,8 +615,8 @@ $('#bt_listGenericTypes').off('click').on('click', function() {
       }
     }
 
-    infos.sort(jeeP.compareGenericName)
-    actions.sort(jeeP.compareGenericName)
+    infos.sort(compareGenericName)
+    actions.sort(compareGenericName)
 
     for (var idx in infos) {
       generic = infos[idx]
@@ -683,4 +633,38 @@ $('#bt_listGenericTypes').off('click').on('click', function() {
   }
   inner += '</table><br/>'
   container.empty().append(inner)
+})
+
+function compareGenericName(a, b) {
+  if ( a.name < b.name ){
+    return -1;
+  }
+  if ( a.name > b.name ){
+    return 1;
+  }
+  return 0;
+}
+
+$(function() {
+  setQueryButtons()
+
+  $("#md_applyCmdsTypes").dialog({
+    closeText: '',
+    autoOpen: false,
+    modal: true,
+    width: 'calc(80% - 200px)',
+    height: 'auto',
+    open: function() {
+      $(this).parent().css({
+        'top': 120
+      })
+      $(this).css('max-height', $(document).height() - 250)
+    },
+    beforeClose: function(event, ui) {
+      $('#md_applyCmdsTypes .maincontainer').empty()
+      $('#bt_applyCmdsTypes').show()
+    }
+  })
+
+  $('#md_applyCmdsTypes').removeClass('hidden')
 })

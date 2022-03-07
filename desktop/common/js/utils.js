@@ -16,9 +16,7 @@
 
 "use strict"
 
-var jeedomUtils = {
-  __description: 'Loaded once for every desktop/mobile page. Global UI functions and variables.'
-}
+var jeedomUtils = {}
 jeedomUtils.backgroundIMG = null
 jeedomUtils._elBackground = null
 
@@ -33,13 +31,16 @@ $(function() {
   })
 })
 
+//design edit options conservation:
+var planEditOption = {state:false, snap:false, grid:false, gridSize:false, highlight:true}
+
 //js error in ! ui:
-jeedomUtils.JS_ERROR = []
+var JS_ERROR = []
 window.addEventListener('error', function(event) {
   if (event.filename.indexOf('3rdparty/') != -1) {
     return
   }
-  jeedomUtils.JS_ERROR.push(event)
+  JS_ERROR.push(event)
   $('#bt_jsErrorModal').show()
   $.hideLoading()
 })
@@ -47,40 +48,41 @@ window.addEventListener('error', function(event) {
 //UI Time display:
 setInterval(function() {
   var dateJeed = new Date
-  dateJeed.setTime((new Date).getTime() + ((new Date).getTimezoneOffset() + jeeFrontEnd.serverTZoffsetMin)*60000 + jeeFrontEnd.clientServerDiffDatetime)
+  dateJeed.setTime((new Date).getTime() + ((new Date).getTimezoneOffset() + serverTZoffsetMin)*60000 + clientServerDiffDatetime)
   $('#horloge').text(dateJeed.toLocaleTimeString())
 }, 1000)
 
 var modifyWithoutSave = false
 jeedomUtils.checkPageModified = function() {
-  if (jeeFrontEnd.modifyWithoutSave || modifyWithoutSave) {
+  if (modifyWithoutSave) {
     if (!confirm('{{Attention vous quittez une page ayant des données modifiées non sauvegardées. Voulez-vous continuer ?}}')) {
       $.hideLoading()
       return true
     }
     modifyWithoutSave = false
-    jeeFrontEnd.modifyWithoutSave = false
     return false
   }
 }
 
-var printEqLogic = undefined
 //OnePage design PageLoader -------------------------------------
+var PREVIOUS_PAGE = null
+var PREVIOUS_LOCATION = null
+var NO_POPSTAT = false
+var printEqLogic = undefined
 jeedomUtils.loadPage = function(_url, _noPushHistory) {
-  jeeFrontEnd.PREVIOUS_LOCATION = window.location.href
+  PREVIOUS_LOCATION = window.location.href
   if (jeedomUtils.checkPageModified()) return
-  if (jeedomUtils.JS_ERROR.length > 0) {
+  if (JS_ERROR.length > 0) {
     document.location.href = _url
     return
   }
 
+  $(window).off('resize')
   jeedomUtils.closeJeedomMenu()
   window.toastr.clear()
 
   $.contextMenu('destroy')
   $('.context-menu-root').remove()
-
-  $(window).off('resize')
 
   try {
     $(".ui-dialog-content").dialog("close")
@@ -88,13 +90,13 @@ jeedomUtils.loadPage = function(_url, _noPushHistory) {
 
   if (!isset(_noPushHistory) || _noPushHistory == false) {
     try {
-      if (jeeFrontEnd.PREVIOUS_PAGE == null) {
+      if (PREVIOUS_PAGE == null) {
         window.history.replaceState('','', 'index.php?'+window.location.href.split("index.php?")[1])
-        jeeFrontEnd.PREVIOUS_PAGE = 'index.php?'+window.location.href.split("index.php?")[1]
+        PREVIOUS_PAGE = 'index.php?'+window.location.href.split("index.php?")[1]
       }
-      if (jeeFrontEnd.PREVIOUS_PAGE == null || jeeFrontEnd.PREVIOUS_PAGE != _url) {
+      if (PREVIOUS_PAGE == null || PREVIOUS_PAGE != _url) {
         window.history.pushState('','', _url)
-        jeeFrontEnd.PREVIOUS_PAGE = _url
+        PREVIOUS_PAGE = _url
       }
     } catch(e) {}
   }
@@ -104,10 +106,9 @@ jeedomUtils.loadPage = function(_url, _noPushHistory) {
   jeedomUtils.datePickerDestroy()
   jeedomUtils.autocompleteDestroy()
   jeedomUtils.cleanModals()
+  jeedom.history.chart = []
   jeedom.cmd.update = []
   jeedom.scenario.update = []
-  jeephp2js = {}
-  delete window.jeeP
   printEqLogic = undefined
   if (jeedomUtils.OBSERVER !== null) jeedomUtils.OBSERVER.disconnect()
   $('body').off('changeThemeEvent')
@@ -129,7 +130,7 @@ jeedomUtils.loadPage = function(_url, _noPushHistory) {
     if (_url.match('#') && _url.split('#')[1] != '' && $('.nav-tabs a[href="#' + _url.split('#')[1] + '"]').html() != undefined) {
       $('.nav-tabs a[href="#' + _url.split('#')[1] + '"]').trigger('click')
     }
-    $('#bt_getHelpPage').attr('data-page', getUrlVars('p')).attr('data-plugin', getUrlVars('m'))
+    $('#bt_getHelpPage').attr('data-page',getUrlVars('p')).attr('data-plugin',getUrlVars('m'))
     jeedomUtils.initPage()
     $('body').attr('data-page', getUrlVars('p')).trigger('jeedom_page_load')
 
@@ -148,7 +149,6 @@ jeedomUtils.loadPage = function(_url, _noPushHistory) {
 
     setTimeout(function() {
       modifyWithoutSave = false
-      jeeFrontEnd.modifyWithoutSave = false
     }, 500)
   })
 
@@ -179,12 +179,12 @@ $(function() {
   $body.off('jeedom_page_load').on('jeedom_page_load', function() {
     if (getUrlVars('saveSuccessFull') == 1) {
       $.fn.showAlert({message: '{{Sauvegarde effectuée avec succès}}', level: 'success'})
-      jeeFrontEnd.PREVIOUS_PAGE=window.location.href.split('&saveSuccessFull')[0]+window.location.hash
+      PREVIOUS_PAGE=window.location.href.split('&saveSuccessFull')[0]+window.location.hash
       window.history.replaceState({}, document.title, window.location.href.split('&saveSuccessFull')[0]+window.location.hash)
     }
     if (getUrlVars('removeSuccessFull') == 1) {
       $.fn.showAlert({message: '{{Suppression effectuée avec succès}}', level: 'success'})
-      jeeFrontEnd.PREVIOUS_PAGE=window.location.href.split('&removeSuccessFull')[0]+window.location.hash
+      PREVIOUS_PAGE=window.location.href.split('&removeSuccessFull')[0]+window.location.hash
       window.history.replaceState({}, document.title, window.location.href.split('&removeSuccessFull')[0]+window.location.hash)
     }
   })
@@ -202,36 +202,36 @@ $(function() {
     if ($(this).closest('.ui-dialog-content').html() !== undefined) {
       return
     }
-    if (jeeFrontEnd.PREVIOUS_PAGE == null) {
+    if (PREVIOUS_PAGE == null) {
       window.history.replaceState('','', 'index.php?'+window.location.href.split("index.php?")[1])
-      jeeFrontEnd.PREVIOUS_PAGE = 'index.php?'+window.location.href.split("index.php?")[1]
+      PREVIOUS_PAGE = 'index.php?'+window.location.href.split("index.php?")[1]
     }
     window.location.hash = event.target.hash
   })
   window.addEventListener('hashchange', function(event) {
-    jeeFrontEnd.NO_POPSTAT = true
+    NO_POPSTAT = true
     setTimeout(function() {
-      jeeFrontEnd.NO_POPSTAT = false
+      NO_POPSTAT = false
     },200)
   })
   window.addEventListener('popstate', function(event) {
     if (event.state === null) {
-      if (jeeFrontEnd.NO_POPSTAT) {
-        jeeFrontEnd.NO_POPSTAT = false
+      if (NO_POPSTAT) {
+        NO_POPSTAT = false
         return
       }
       if (window.location.hash != '' && $('.nav-tabs a[href="'+window.location.hash+'"]:visible').length != 0) {
         $('.nav-tabs a[href="'+window.location.hash+'"]').click()
-      } else if (jeeFrontEnd.PREVIOUS_PAGE !== null && jeeFrontEnd.PREVIOUS_PAGE.includes('#') && jeeFrontEnd.PREVIOUS_PAGE.split('#')[0] != 'index.php?'+window.location.href.split("index.php?")[1].split('#')[0]) {
+      } else if (PREVIOUS_PAGE !== null && PREVIOUS_PAGE.includes('#') && PREVIOUS_PAGE.split('#')[0] != 'index.php?'+window.location.href.split("index.php?")[1].split('#')[0]) {
         if (jeedomUtils.checkPageModified()) return
         jeedomUtils.loadPage('index.php?'+window.location.href.split("index.php?")[1],true)
-        jeeFrontEnd.PREVIOUS_PAGE = 'index.php?'+window.location.href.split("index.php?")[1]
+        PREVIOUS_PAGE = 'index.php?'+window.location.href.split("index.php?")[1]
       }
       return
     }
     if (jeedomUtils.checkPageModified()) return
     jeedomUtils.loadPage('index.php?'+window.location.href.split("index.php?")[1],true)
-    jeeFrontEnd.PREVIOUS_PAGE = 'index.php?'+window.location.href.split("index.php?")[1]
+    PREVIOUS_PAGE = 'index.php?'+window.location.href.split("index.php?")[1]
   })
 
   jeedomUtils.setJeedomTheme()
@@ -265,7 +265,7 @@ $(function() {
     "progressBar": true,
     "onclick": function() {
       window.toastr.clear()
-      $('#md_modal').dialog({title: "{{Centre de Messages}}"}).load('index.php?v=d&modal=message.display').dialog('open')
+      $('#md_modal').dialog({title: "{{Centre de Messages}}"}).load('index.php?v=d&p=message&ajax=1').dialog('open')
     }
   }
   jeedomUtils.toastrUIoptions = {
@@ -426,7 +426,7 @@ jeedomUtils.triggerThemechange = function() {
   }
 
   //trigger event for widgets:
-  if ($('body').attr('data-page') && ['dashboard', 'view', 'plan','widgets'].includes($('body').attr('data-page')) ) {
+  if ($('body').attr('data-page') && ['dashboard', 'panel', 'view', 'plan','widgets'].includes($('body').attr('data-page')) ) {
     if (currentTheme.endsWith('Light')) {
       $('body').trigger('changeThemeEvent', ['Light'])
     } else {
@@ -458,7 +458,6 @@ jeedomUtils.setBackgroundImage = function(_path) {
     }
 
     if (!jeedomUtils._elBackground) jeedomUtils._elBackground = $('#backgroundforJeedom')
-
     if (_path.substring(0, 4) == 'core') {
       jeedomUtils._elBackground.removeClass('custom')
       _path += mode + '.jpg'
@@ -495,8 +494,8 @@ jeedomUtils.transitionJeedomBackground = function(_path) {
 jeedomUtils.initJeedomModals = function() {
   $.fn.modal.Constructor.prototype.enforceFocus = function() {}
 
-  if (isset(jeeFrontEnd.language) ) {
-    var lang = jeeFrontEnd.language.substr(0, 2)
+  if (isset(jeedom_langage) ) {
+    var lang = jeedom_langage.substr(0, 2)
     var supportedLangs = ['fr', 'de', 'es']
     if ( lang != 'en' && supportedLangs.includes(lang) ) {
       bootbox.addLocale('fr', {OK: '<i class="fas fa-check"></i> Ok', CONFIRM: '<i class="fas fa-check"></i> Ok', CANCEL: '<i class="fas fa-times"></i> Annuler'})
@@ -643,12 +642,12 @@ jeedomUtils.setButtonCtrlHandler = function(_button, _title, _uri, _modal='#md_m
 }
 
 jeedomUtils.setJeedomGlobalUI = function() {
-  if (typeof jeeFrontEnd.jeedom_firstUse != 'undefined' && isset(jeeFrontEnd.jeedom_firstUse) && jeeFrontEnd.jeedom_firstUse == 1 && getUrlVars('noFirstUse') != 1) {
+  if (typeof jeedom_firstUse != 'undefined' && isset(jeedom_firstUse) && jeedom_firstUse == 1 && getUrlVars('noFirstUse') != 1) {
     $('#md_modal').dialog({title: "{{Bienvenue dans Jeedom}}"}).load('index.php?v=d&modal=first.use').dialog('open')
   }
 
-  $(window).bind('beforeunload', function() { //keep old root for plugins
-    if (jeeFrontEnd.modifyWithoutSave || modifyWithoutSave) {
+  $(window).bind('beforeunload', function() {
+    if (modifyWithoutSave) {
       return '{{Attention vous quittez une page ayant des données modifiées non sauvegardées. Voulez-vous continuer ?}}';
     }
   })
@@ -656,7 +655,7 @@ jeedomUtils.setJeedomGlobalUI = function() {
   jeedomUtils.setButtonCtrlHandler('#bt_showEventInRealTime', '{{Evénements en temps réel}}', 'log.display&log=event', '#md_modal')
   jeedomUtils.setButtonCtrlHandler('#bt_showNoteManager', '{{Notes}}', 'note.manager', '#md_modal')
   jeedomUtils.setButtonCtrlHandler('#bt_showExpressionTesting', "{{Testeur d'expression}}", 'expression.test', '#md_modal')
-  jeedomUtils.setButtonCtrlHandler('#bt_showDatastoreVariable', '{{Variables}}', 'dataStore.management&type=scenario', '#md_modal', false)
+  jeedomUtils.setButtonCtrlHandler('#bt_showDatastoreVariable', '{{Variables des scénarios}}', 'dataStore.management&type=scenario', '#md_modal', false)
   jeedomUtils.setButtonCtrlHandler('#bt_showSearching', '{{Recherche}}', 'search', '#md_modal')
 
   $('#bt_gotoDashboard').on('click',function(event) {
@@ -721,7 +720,7 @@ jeedomUtils.setJeedomGlobalUI = function() {
 
   $('#bt_messageModal').on('click',function() {
     jeedomUtils.closeModal('md_modal')
-    $('#md_modal').dialog({title: "{{Centre de Messages}}"}).load('index.php?v=d&modal=message.display').dialog('open')
+    $('#md_modal').dialog({title: "{{Centre de Messages}}"}).load('index.php?v=d&p=message&ajax=1').dialog('open')
   })
   $('#bt_jsErrorModal').on('click',function() {
     jeedomUtils.closeModal('md_modal')
@@ -735,7 +734,7 @@ jeedomUtils.setJeedomGlobalUI = function() {
     if ($('body').attr('data-page') == "overview" && $(this).parents('.objectSummaryglobal').length == 0) return false
 
     var url = 'index.php?v=d&p=dashboard&summary=' + $(this).data('summary') + '&object_id=' + $(this).data('object_id')
-    if (window.location.href.includes('&btover=1') || ($('body').attr('data-page') != "dashboard" && jeeFrontEnd.userProfils.homePage == 'core::overview')) {
+    if (window.location.href.includes('&btover=1') || ($('body').attr('data-page') != "dashboard" && userProfils.homePage == 'core::overview')) {
       url += '&btover=1'
     }
     jeedomUtils.loadPage(url)
@@ -940,7 +939,7 @@ jeedomUtils.autocompleteDestroy = function() {
 }
 
 jeedomUtils.datePickerInit = function() {
-  var datePickerRegion = jeeFrontEnd.language.substring(0,2)
+  var datePickerRegion = jeedom_langage.substring(0,2)
   if (isset($.datepicker.regional[datePickerRegion])) {
     var datePickerRegional = $.datepicker.regional[datePickerRegion]
   } else {
@@ -1079,14 +1078,14 @@ jeedomUtils.addOrUpdateUrl = function(_param,_value,_title) {
     if (url.indexOf('#') != -1) {
       url = url.substring(0, url.indexOf('#'))
     }
-    if (jeeFrontEnd.PREVIOUS_PAGE != 'index.php?'+window.location.href.split("index.php?")[1]) {
+    if (PREVIOUS_PAGE != 'index.php?'+window.location.href.split("index.php?")[1]) {
       window.history.pushState('','', window.location.href)
     }
     if (_title && _title != '') {
       document.title = _title
     }
     window.history.pushState('','', url.toString())
-    jeeFrontEnd.PREVIOUS_PAGE = 'index.php?'+url.split("index.php?")[1]
+    PREVIOUS_PAGE = 'index.php?'+url.split("index.php?")[1]
   } else {
     if (_title && _title != '') {
       document.title = _title
@@ -1422,33 +1421,7 @@ jQuery.fn.setSelection = function(selectionStart, selectionEnd) {
 
 $.ui.dialog.prototype._focusTabbable = $.noop //avoid ui-dialog focus on inputs when opening
 
-/*
-return new fonction with deprecated message
-example: function initTooltips(_el) { return jeedomUtils.deprecatedFunc('4.3', initTooltips, 'initTooltips', 'jeedomUtils')(); }
-@_version {string}
-@_oldFunc {function}
-@_newFunc {function}
-OR
-@_oldFunc {function}
-@_newFunc {string}
-@_namespace {string}
-*/
-jeedomUtils.deprecatedFunc = function(_version='4.3', _oldFunc, _newFunc, _namespace) {
-  if (isset(_namespace)) {
-    var newName = _namespace + '.' + _newFunc
-    _newFunc = window[_namespace][_newFunc]
-  } else {
-    var newName = _newFunc.name
-  }
-  const wrapper = function() {
-    console.error(`JEEDOM WARNING! Deprecated function since Core v${_version} called: Please use the new ${newName}() function instead!`)
-    _newFunc.apply(this, arguments)
-  }
-  wrapper.prototype = _newFunc.prototype
-  return wrapper
-}
-
-//Introduced in v4.2 -> deprecated v4.4 -> obsolete v4.5
+//Introduced in v4.2 -> deprecated v4.3 -> remove v4.4
 var checkPageModified = jeedomUtils.checkPageModified
 var loadPage = jeedomUtils.loadPage
 var initPage = jeedomUtils.initPage
@@ -1467,8 +1440,3 @@ var addOrUpdateUrl = jeedomUtils.addOrUpdateUrl
 var positionEqLogic = jeedomUtils.positionEqLogic
 var chooseIcon = jeedomUtils.chooseIcon
 var getOpenedModal = jeedomUtils.getOpenedModal
-
-
-//Introduced in v4.3 -> obsolete 4.4
-var jeedom_langage = jeeFrontEnd.language
-var userProfils = jeeFrontEnd.userProfils

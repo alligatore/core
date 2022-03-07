@@ -14,7 +14,7 @@ foreach($result as $res) {
   }
   $tableList[$res['TABLE_NAME']][] = array('colName' => $res['COLUMN_NAME'], 'colType' => $res['DATA_TYPE'], 'colExtra' => $res['EXTRA']);
 }
-sendVarToJS('jeephp2js.tableList', $tableList);
+sendVarToJS('_tableList_', $tableList);
 ?>
 
 <div id="div_rowSystemCommand" class="row">

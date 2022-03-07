@@ -16,7 +16,7 @@ Al abrir la página, si esta verificación tiene más de dos horas, Jeedom rehac
 También puedes usar el botón **Buscar actualizaciones** Para hacerlo manualmente.
 Si desea realizar una verificación manual, puede presionar el botón "Buscar actualizaciones".
 
-El botón **Para salvaguardar** se utilizará cuando cambie las opciones en la tabla a continuación, para especificar que no se actualicen ciertos complementos si es necesario.
+El botón **Salvar** se utilizará cuando cambie las opciones en la tabla a continuación, para especificar que no se actualicen ciertos complementos si es necesario.
 
 ## Actualiza el núcleo
 

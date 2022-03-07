@@ -1069,9 +1069,7 @@ class plugin {
 			$update = update::byLogicalId($this->id);
 			if (is_object($update)) {
 				$this->info = $update->getInfo();
-				if (is_object($update)) {
-					$this->source = $update->getSource();
-				}
+				$this->source = $update->getSource();
 			}
 		}
 		if ($_name !== '') {

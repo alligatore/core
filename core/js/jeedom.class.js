@@ -15,41 +15,11 @@
  */
 
 function jeedom() {}
-jeedom.__description = 'All js methods per Jeedom class. Handles front-end <-> ajax <-> php classes.'
 jeedom.cache = [];
 jeedom.display = {};
 jeedom.connect = 0;
 jeedom.theme = {};
 jeedom.changes_timeout = null;
-
-jeeFrontEnd = {
-  __description: 'Global object where each Core page register its own functions and variable in its sub-object name.',
-  jeedom_firstUse: '',
-  language: '',
-  userProfils: {},
-  planEditOption: {state: false, snap: false, grid: false, gridSize: false, highlight: true},
-  //loadPage history:
-  PREVIOUS_PAGE: null,
-  PREVIOUS_LOCATION: null,
-  NO_POPSTAT: false,
-  modifyWithoutSave: false,
-  //@index.php
-  serverDatetime: null,
-  clientServerDiffDatetime: null,
-  serverDatetime: null,
-  serverTZoffsetMin: null,
-}
-
-/*
-Jeedom namespace for data transfer php -> js through sendVarToJS(). Emptied on loadPage()
-@php:
-sendVarToJS([
-  'jeephp2js.myjsvar1' => init('type', ''),
-  'jeephp2js.myjsvar2' => config::byKey('enableCustomCss')
-]);
-*/
-jeephp2js = {}
-
 var Highcharts
 
 if (!isset(jeedom.cache.getConfiguration)) {
@@ -123,7 +93,7 @@ jeedom.changes = function() {
 }
 
 jeedom.init = function() {
-  jeedom.datetime = jeeFrontEnd.serverDatetime;
+  jeedom.datetime = serverDatetime;
   jeedom.display.version = 'desktop';
   if ($.mobile) {
     jeedom.display.version = 'mobile';
@@ -281,6 +251,7 @@ jeedom.refreshMessageNumber = function() {
     },
     success: function(_number) {
       jeedom.MESSAGE_NUMBER = _number;
+      if ($.mobile) $('.span_nbMessage').html(_number)
       if (_number == 0 || _number == '0') {
         $('#span_nbMessage').hide()
       } else {
@@ -292,7 +263,6 @@ jeedom.refreshMessageNumber = function() {
 
 jeedom.UPDATE_NUMBER
 jeedom.refreshUpdateNumber = function() {
-  if (jeedom.update == undefined) return //mobile
   jeedom.update.number({
     error: function(error) {
       $.fn.showAlert({
@@ -947,45 +917,6 @@ jeedom.massEditSave = function(_params) {
     action: 'massEditSave',
     type: _params.type,
     objects: json_encode(_params.objects)
-  };
-  $.ajax(paramsAJAX);
-}
-
-jeedom.systemGetUpgradablePackage = function(_params) {
-  var paramsRequired = ['type'];
-  var paramsSpecifics = {};
-  try {
-      jeedom.private.checkParamsRequired(_params || {}, paramsRequired);
-  } catch (e) {
-      (_params.error || paramsSpecifics.error || jeedom.private.default_params.error)(e);
-      return;
-  }
-  var params = $.extend({}, jeedom.private.default_params, paramsSpecifics, _params || {});
-  var paramsAJAX = jeedom.private.getParamsAJAX(params);
-  paramsAJAX.url = 'core/ajax/jeedom.ajax.php';
-  paramsAJAX.data = {
-      action: 'systemGetUpgradablePackage',
-      type: _params.type,
-      forceRefresh : _params.forceRefresh || false
-  };
-  $.ajax(paramsAJAX);
-}
-
-jeedom.systemUpgradablePackage = function(_params) {
-  var paramsRequired = ['type'];
-  var paramsSpecifics = {};
-  try {
-      jeedom.private.checkParamsRequired(_params || {}, paramsRequired);
-  } catch (e) {
-      (_params.error || paramsSpecifics.error || jeedom.private.default_params.error)(e);
-      return;
-  }
-  var params = $.extend({}, jeedom.private.default_params, paramsSpecifics, _params || {});
-  var paramsAJAX = jeedom.private.getParamsAJAX(params);
-  paramsAJAX.url = 'core/ajax/jeedom.ajax.php';
-  paramsAJAX.data = {
-      action: 'systemUpgradablePackage',
-      type: _params.type,
   };
   $.ajax(paramsAJAX);
 }

@@ -1174,8 +1174,7 @@ class scenarioExpression {
 		return $_default;
 	}
 
-	public static function setTags(&$_expression, &$_scenario = null, $_quote = false, $_nbCall = 0) {
-		$_expression = trim($_expression);
+	public static function setTags($_expression, &$_scenario = null, $_quote = false, $_nbCall = 0) {
 		if (config::byKey('expression::autoQuote', 'core', 1) == 0) {
 			$_quote = false;
 		}

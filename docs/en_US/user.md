@@ -6,7 +6,7 @@ This page allows you to define the list of users authorized to connect to Jeedom
 On the page you have three buttons :
 
 - Add user.
-- To safeguard.
+- Save.
 - Open support access.
 
 ## Users list
@@ -36,7 +36,7 @@ When clicking on &quot;Rights&quot; a window appears allowing you to manage user
 > The profile must be limited otherwise no restrictions put here will be taken into account.
 
 You get a table which allows, for each device and each scenario, to define the rights of the user :
-- **Any** : the user does not see the equipment / scenario.
+- **No** : the user does not see the equipment / scenario.
 - **Visualization** : the user sees the equipment / scenario but cannot act on it.
 - **Visualization and execution** : the user sees the equipment / scenario and can act on it (lighting a lamp, launching the scenario, etc).
 

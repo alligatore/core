@@ -10,6 +10,7 @@ foreach ($repos as $key => $value) {
 }
 global $JEEDOM_INTERNAL_CONFIG;
 $configs = config::byKeys($keys);
+sendVarToJS('ldapEnable', $configs['ldap::enable']);
 user::isBan();
 ?>
 
@@ -804,7 +805,6 @@ user::isBan();
 				<form class="form-horizontal">
 					<div id="div_actionOnMessage"></div>
 				</form>
-
 				<ul class="nav nav-tabs" role="tablist">
 					<li role="presentation" class="active"><a href="#log_alertes" role="tab" data-toggle="tab"><i class="fas fa-bell"></i> {{Alertes}}</a></li>
 					<li role="presentation"><a href="#log_log" role="tab" data-toggle="tab"><i class="fas fa-file"></i> {{Logs}}</a></li>
@@ -1104,7 +1104,7 @@ user::isBan();
 								</select>
 							</div>
 						</div>
-                        <div class="form-group">
+						<div class="form-group">
 							<label class="col-lg-4 col-md-4 col-sm-6 col-xs-6 control-label">{{Autoriser les dates dans le futur}}
 								<sup><i class="fas fa-question-circle" tooltip="{{Autorise l'affichage d'historique avec des dates dans le futur.}}"></i></sup>
 							</label>
@@ -2004,7 +2004,7 @@ user::isBan();
 								$div .= '<label class="col-xs-12 control-label pull-left">{{Clé API}} : ' . $plugin->getName() . '</label>';
 								$div .= '<div class="col-lg-4 col-md-3 col-sm-4 col-xs-12">';
 								$div .= '<div class="input-group">';
-								$div .= '<input class="span_apikey roundedLeft form-control" readonly value="' . jeedom::getApiKey($plugin->getId(), 'disable') . '" />';
+								$div .= '<input class="span_apikey roundedLeft form-control" readonly value="' . jeedom::getApiKey($plugin->getId()) . '" />';
 								$div .= '<span class="input-group-btn">';
 								$div .= '<a class="btn btn-default form-control bt_regenerate_api roundedRight" data-plugin="' . $plugin->getId() . '"><i class="fas fa-sync"></i></a>';
 								$div .= '</span>';
@@ -2020,7 +2020,7 @@ user::isBan();
 								$div .= '</select>';
 								$div .= '</div>';
 								$div .= '<label class="col-lg-2 col-md-3 col-sm-3 col-xs-6 control-label">{{Accès restreint}}';
-								$div .= '<sup> <i class="fas fa-question-circle" tooltip="{{Les appels API seront bloqués pour les méthodes du Core.}}"></i></sup>';
+								$div .= '<sup><i class="fas fa-question-circle" tooltip="{{Les appels API seront bloqués pour les méthodes du Core.}}"></i></sup>';
 								$div .= '</label>';
 								$div .= '<div class="col-lg-1 col-md-1 col-sm-1 col-xs-6">';
 								$div .= '<input type="checkbox" class="form-control configKey" data-l1key="api::' . $plugin->getId() . '::restricted" />';

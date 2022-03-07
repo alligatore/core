@@ -36,7 +36,7 @@ try {
 		@session_write_close();
 		$return['user_login'] = $_SESSION['user']->getLogin();
 
-		$return['language'] = config::byKey('language', 'core', 'fr_FR');
+		$return['langage'] = config::byKey('language', 'core', 'fr_FR');
 		$return['userProfils'] = $_SESSION['user']->getOptions();
 		$return['userProfils']['defaultMobileViewName'] = __('Vue', __FILE__);
 		if ($_SESSION['user']->getOptions('defaultDesktopView') != '') {
@@ -322,23 +322,6 @@ try {
 			system::checkAndInstall($packages, true);
 		}
 		ajax::success();
-	}
-
-
-	if (init('action') == 'systemGetUpgradablePackage') {
-		if (init('type') == 'all') {
-			$return = system::getUpgradablePackage('apt', init('forceRefresh', false));
-			$return = array_merge($return, system::getUpgradablePackage('pip2', init('forceRefresh', false)));
-			$return = array_merge($return, system::getUpgradablePackage('pip3', init('forceRefresh', false)));
-			ajax::success($return);
-		} else {
-			ajax::success(system::getUpgradablePackage(init('type'), init('forceRefresh', false)));
-		}
-	}
-
-	if (init('action') == 'systemUpgradablePackage') {
-		unautorizedInDemo();
-		ajax::success(system::upgradePackage(init('type')));
 	}
 
 	if (init('action') == 'health') {

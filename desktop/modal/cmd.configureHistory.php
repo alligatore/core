@@ -19,7 +19,7 @@ if (!isConnect('admin')) {
 }
 $count = array('history' => config::getHistorizedCmdNum(), 'timeline' => config::getTimelinedCmdNum());
 $cmds = cmd::all();
-sendVarToJs('jeephp2js.md_cmdConfigureHistory_numCmds', count($cmds));
+sendVarToJs('CMDNUM', count($cmds));
 
 //Tablesorter parser:
 include_file('3rdparty', 'jquery.tablesorter/parsers/parser-input-select.min', 'js');
@@ -28,7 +28,7 @@ include_file('3rdparty', 'jquery.tablesorter/extras/jquery.tablesorter.pager.min
 include_file('3rdparty', 'jquery.tablesorter/_jeedom/pager-custom-constrols', 'js');
 ?>
 
-<div style="display: none;" id="md_cmdConfigureHistory" data-modalType="md_cmdConfigureHistory"></div>
+<div style="display: none;" id="md_cmdConfigureHistory"></div>
 <a class="btn btn-success btn-xs pull-right" id="bt_cmdConfigureCmdHistoryApply"><i class="fas fa-check"></i> {{Valider}}</a>
 <div class="center">
   <span class="label label-info">{{Commandes :}} <?php echo ' '.count($cmds) ?> | {{Commandes historisées :}}<?php echo ' ' . $count['history'] ?> | {{Commandes timeline :}}<?php echo ' ' . $count['timeline'] ?></span>
@@ -69,8 +69,8 @@ include_file('3rdparty', 'jquery.tablesorter/_jeedom/pager-custom-constrols', 'j
       <th class="extractor-select sorter-purges">{{Purge}}</th>
       <th data-sorter="false" data-filter="false">{{Action}}</th>
     </tr>
-  </thead>
 
+  </thead>
   <tbody>
     <?php
     $tr = '';
@@ -202,8 +202,6 @@ $('.cmdAttr').on('change click', function() {
   $(this).closest('tr').attr('data-change', '1')
 })
 
-
-
 $('select[data-l2key="historyPurge"]').on('change', function(){
   $tableCmdConfigureHistory.trigger('updateCell', [$(this).parent()])
 })
@@ -225,9 +223,8 @@ function setTableParser() {
       if (s == '-2 years') return 730
       if (s == '-3 years') return 1095
     },
-    type: 'numeric',
+    type: 'numeric'
   })
-
   $('#bt_canceltimeline').on('mousedown', function(event) {
     $('.cmdAttr[data-l1key=configuration][data-l2key="timeline::enable"]:visible').each(function() {
       $(this).prop('checked', false)
@@ -249,7 +246,6 @@ function setTableParser() {
       $(this).attr('placeholder', '{{Dossier}}')
     }
   })
-
 }
 
 $(function() {
@@ -287,10 +283,10 @@ $(function() {
   })
 
 
-  if (jeephp2js.md_cmdConfigureHistory_numCmds < 500) {
+  if (CMDNUM < 500) {
     jeedomUtils.initTooltips($tableCmdConfigureHistory)
   }
-  if (jeephp2js.md_cmdConfigureHistory_numCmds < 1000) {
+  if (CMDNUM < 1000) {
     jeedom.timeline.autocompleteFolder()
   }
   setTimeout(function() {

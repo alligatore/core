@@ -16,16 +16,6 @@
 
 "use strict"
 
-if (!jeeFrontEnd.profils) {
-  jeeFrontEnd.profils = {
-    init: function() {
-      window.jeeP = this
-    },
-  }
-}
-
-jeeFrontEnd.profils.init()
-
 document.onkeydown = function(event) {
   if ((event.ctrlKey || event.metaKey) && event.which == 83) { //s
     event.preventDefault()
@@ -33,10 +23,12 @@ document.onkeydown = function(event) {
   }
 }
 
+var $modal = $('#md_modal')
+var $tableDevices = $('#tableDevices')
 $(function() {
   jeedomUtils.initTableSorter()
-  $('#tableDevices')[0].config.widgetOptions.resizable_widths = ['', '180px', '180px', '80px']
-  $('#tableDevices').trigger('applyWidgets')
+  $tableDevices[0].config.widgetOptions.resizable_widths = ['', '180px', '180px', '80px']
+  $tableDevices.trigger('applyWidgets')
     .trigger('resizableReset')
     .trigger('sorton', [
       [
@@ -48,7 +40,7 @@ $(function() {
 $("#bt_saveProfils").on('click', function(event) {
   $.hideAlert()
   var profil = $('#div_userProfils').getValues('.userAttr')[0]
-  if (jeephp2js.profils_user_id == -1) {
+  if (profils_user_id == -1) {
     if (profil.password != $('#in_passwordCheck').value()) {
       $.fn.showAlert({
         message: "{{Les deux mots de passe ne sont pas identiques}}",
@@ -78,13 +70,13 @@ $("#bt_saveProfils").on('click', function(event) {
           },
           success: function(data) {
             $('#div_userProfils').setValues(data, '.userAttr')
-            jeeFrontEnd.modifyWithoutSave = false
+            modifyWithoutSave = false
           }
         })
       }
     })
   } else {
-    profil.id = jeephp2js.profils_user_id;
+    profil.id = profils_user_id;
     jeedom.user.save({
       users: [profil],
       error: function(error) {
@@ -106,7 +98,7 @@ $("#bt_saveProfils").on('click', function(event) {
             })
           },
           success: function(data) {
-            jeeFrontEnd.modifyWithoutSave = false
+            modifyWithoutSave = false
           }
         })
       }
@@ -116,7 +108,7 @@ $("#bt_saveProfils").on('click', function(event) {
 })
 
 jeedom.user.get({
-  id: jeephp2js.profils_user_id,
+  id: profils_user_id,
   error: function(error) {
     $.fn.showAlert({
       message: error.message,
@@ -126,12 +118,12 @@ jeedom.user.get({
   success: function(data) {
     $('#div_userProfils').setValues(data, '.userAttr')
     $('#in_passwordCheck').value(data.password)
-    jeeFrontEnd.modifyWithoutSave = false
+    modifyWithoutSave = false
   }
 })
 
 $('#div_userProfils').off('change', '.userAttr').on('change', '.userAttr:visible', function() {
-  jeeFrontEnd.modifyWithoutSave = true
+  modifyWithoutSave = true
 })
 
 $('.bt_selectWarnMeCmd').on('click', function() {
@@ -152,7 +144,8 @@ $('#bt_configureTwoFactorAuthentification').on('click', function() {
   }).load('index.php?v=d&modal=twoFactor.authentification').dialog('open')
 })
 
-if (jeephp2js.profils_user_id == -1) {
+
+if (profils_user_id == -1) {
   $('#bt_genUserKeyAPI').on('click', function() {
     var profil = $('#div_userProfils').getValues('.userAttr')[0]
     profil.hash = ''
@@ -178,7 +171,7 @@ if (jeephp2js.profils_user_id == -1) {
           },
           success: function(data) {
             $('#div_userProfils').setValues(data, '.userAttr')
-            jeeFrontEnd.modifyWithoutSave = false
+            modifyWithoutSave = false
           }
         })
       }
@@ -196,7 +189,7 @@ if (jeephp2js.profils_user_id == -1) {
         })
       },
       success: function(data) {
-        jeeFrontEnd.modifyWithoutSave = false
+        modifyWithoutSave = false
         window.location.reload()
       }
     })
@@ -212,7 +205,7 @@ if (jeephp2js.profils_user_id == -1) {
         })
       },
       success: function(data) {
-        jeeFrontEnd.modifyWithoutSave = false
+        modifyWithoutSave = false
         window.location.reload()
       }
     })

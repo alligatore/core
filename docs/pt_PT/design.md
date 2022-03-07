@@ -28,8 +28,8 @@ No menu (clique direito), encontramos as seguintes ações :
 - **Adicionar imagem / câmera** : Permite adicionar uma imagem ou um fluxo de uma câmera.
 - **Adicionar área** : Permite adicionar uma zona transparente clicável que poderá executar uma série de ações durante um clique (dependendo ou não do status de outro comando).
 - **Adicionar resumo** : Adiciona informações de um objeto ou resumo geral.
-- **Tela**
-    - **Algum** : Não exibe nenhuma grade.
+- **Exibição**
+    - **Qualquer** : Não exibe nenhuma grade.
     - **10x10** : Exibe uma grade 10 por 10.
     - **15x15** : Exibe uma grade de 15 por 15.
     - **20x20** : Exibe uma grade de 20 por 20.
@@ -40,7 +40,7 @@ No menu (clique direito), encontramos as seguintes ações :
 - **Criar um design** : Permite adicionar um novo design.
 - **Projeto duplicado** : Duplica o design atual.
 - **Cenografia** : Acesso à configuração do design.
-- **Para salvaguardar** : Salve o design (observe, também há backups automáticos durante determinadas ações).
+- **Salve ** : Salve o design (observe, também há backups automáticos durante determinadas ações).
 
 > **Importante**
 >
@@ -51,21 +51,21 @@ No menu (clique direito), encontramos as seguintes ações :
 Encontrado aqui :
 
 - **Geral**
-    - **Nome** : O nome do seu design.
+    - **Último nome** : O nome do seu design.
     - **Posição** : A posição do design no menu. Permite que você encomende os desenhos.
     - **Fundo transparente** : Torna o plano de fundo transparente. Atenção, se a caixa estiver marcada, a cor do plano de fundo não será usada.
     - **Cor de fundo** : Cor do plano de fundo do design.
     - **Código de acesso** : Código de acesso ao seu design (se vazio, nenhum código é necessário).
     - **Ícone** : Um ícone para ele (aparece no menu de opções de design).
-    - **Foto**
-        - **Mandar** : Permite adicionar uma imagem de plano de fundo ao design.
+    - **Cenário**
+        - **Enviar** : Permite adicionar uma imagem de plano de fundo ao design.
         - **Excluir imagem** : Excluir imagem.
 - **Tamanhos**
     - **Tamanho (LxA))** : Permite definir o tamanho em pixels do seu design.
 
 ## Configuração geral de elementos
 
-> **Observação**
+> **Nota**
 >
 > Dependendo do tipo de item, as opções podem mudar.
 
@@ -116,7 +116,7 @@ Permite escolher os comandos para grapher.
 - **Fronteira** : permite adicionar uma borda, cuidado com a sintaxe é HTML (você deve usar a sintaxe CSS, por exemplo : sólido 1px preto).
 - **Tamanho da fonte** : permite alterar o tamanho da fonte (ex 50%, você deve colocar o sinal de%).
 - **Alinhamento de texto** : permite escolher o alinhamento do texto (esquerda / direita / centralizado)).
-- **Gordo** : texto em negrito.
+- **Gordura** : texto em negrito.
 - **Texto** : Texto em código HTML que estará no elemento.
 
 > **Importante**
@@ -131,15 +131,15 @@ Permite escolher os comandos para grapher.
 
 ### Configurações de exibição específicas
 
-- **Nome** : Nome do link (texto exibido).
-- **Link** : Link para o design ou exibição em questão.
+- **Último nome** : Nome do link (texto exibido).
+- **Ligação** : Link para o design ou exibição em questão.
 - **Cor de fundo** : Permite alterar a cor do plano de fundo ou torná-la transparente; não se esqueça de alterar "Padrão" para NÃO.
 - **Cor do texto** : Permite alterar a cor dos ícones e textos (tenha cuidado para definir Padrão como Não).
 - **Arredonde os ângulos (não esqueça de colocar%, ex 50%)** : Permite arredondar os ângulos, não se esqueça de colocar o%.
 - **Fronteira (atenção sintaxe CSS, ex : sólido 1px preto)** : Permite adicionar uma borda, cuidado com a sintaxe é HTML.
 - **Tamanho da fonte (ex 50%, você deve colocar o sinal de%)** : Permite alterar o tamanho da fonte.
 - **Alinhamento de texto** : Permite escolher o alinhamento do texto (esquerda / direita / centralizado)).
-- **Gordo** : Texto em negrito.
+- **Gordura** : Texto em negrito.
 
 ## Equipement
 
@@ -149,9 +149,9 @@ Permite escolher os comandos para grapher.
 - **Ocultar nome** : Marque para ocultar o nome do equipamento.
 - **Cor de fundo** : Permite escolher uma cor de fundo personalizada, exibir o equipamento com um fundo transparente ou usar a cor padrão.
 - **Cor do texto** : Permite escolher uma cor de plano de fundo personalizada ou usar a cor padrão.
-- **Arredondado** : Valor em pixels do arredondamento dos ângulos do bloco do equipamento.
+- **Arredondamento** : Valor em pixels do arredondamento dos ângulos do bloco do equipamento.
 - **Fronteira** : Definição CSS de uma borda de bloco de equipamento. Ex : 1px preto sólido.
-- **Opacidade** : Opacidade do ladrilho do equipamento, entre 0 e 1. Aviso : uma cor de fundo deve ser definida.
+- **Opacidade** : Opacidade do ladrilho do equipamento, entre 0 e 1. Atenção : uma cor de fundo deve ser definida.
 - **CSS personalizado** : Regras CSS a serem aplicadas no equipamento.
 - **Aplicar css personalizado em** : Seletor de CSS no qual aplicar CSS personalizado.
 
@@ -178,8 +178,8 @@ Exibe a janela de configuração avançada do equipamento (consulte a documenta�
 
 ### Configurações de exibição específicas
 
-- **Mostrar** : Define o que você deseja exibir, imagem estática ou transmitir a partir de uma câmera.
-- **Foto** : Envie a imagem em questão (se você escolheu uma imagem).
+- **Pôster** : Define o que você deseja exibir, imagem estática ou transmitir a partir de uma câmera.
+- **Cenário** : Envie a imagem em questão (se você escolheu uma imagem).
 - **Câmera** : Câmera a ser exibida (se você escolher a câmera).
 
 ## Zone
@@ -213,13 +213,13 @@ Nesse modo, ao passar o mouse ou clicar na área Jeedom, você exibirá o widget
 
 ### Configurações de exibição específicas
 
-- **Link** : Permite indicar o resumo a ser exibido (Geral para o global, caso contrário, indique o assunto).
+- **Ligação** : Permite indicar o resumo a ser exibido (Geral para o global, caso contrário, indique o assunto).
 - **Cor de fundo** : Permite alterar a cor do plano de fundo ou torná-la transparente; não se esqueça de alterar "Padrão" para NÃO.
 - **Cor do texto** : Permite alterar a cor dos ícones e textos (tenha cuidado para definir Padrão como Não).
 - **Arredonde os ângulos (não esqueça de colocar%, ex 50%)** : Permite arredondar os ângulos, não se esqueça de colocar o%.
 - **Fronteira (atenção sintaxe CSS, ex : sólido 1px preto)** : Permite adicionar uma borda, cuidado com a sintaxe é HTML.
 - **Tamanho da fonte (ex 50%, você deve colocar o sinal de%)** : Permite alterar o tamanho da fonte.
-- **Gordo** : Texto em negrito.
+- **Gordura** : Texto em negrito.
 
 ## FAQ
 

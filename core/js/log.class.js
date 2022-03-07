@@ -180,6 +180,8 @@ jeedom.log.autoupdate = function(_params) {
   if (_params.callNumber == 0) {
     if (isset(_params.default_search)) {
       _params['search'].value(_params.default_search);
+    } else {
+      _params['search'].value('');
     }
     _params.display.scrollTop(_params.display.height() + 200000);
     if (_params['control'].attr('data-state') == 0 && _params['once'] == 0) {
@@ -242,22 +244,20 @@ jeedom.log.autoupdate = function(_params) {
         }
       }
 
-      var $brutlogcheck = $('#brutlogcheck')
-
       var colorMe = false
-      var isAuto = ($brutlogcheck.attr('autoswitch') == 1) ? true : false
+      var isAuto = ($rawLogCheck.attr('autoswitch') == 1) ? true : false
       var isLong = (log.length > jeedom.log.coloredThreshold) ? true : false
 
-      if (!$brutlogcheck.is(':checked') && !isLong) {
+      if (!$rawLogCheck.is(':checked') && !isLong) {
         colorMe = true
-      } else if (isLong && !isAuto && !$brutlogcheck.is(':checked')) {
+      } else if (isLong && !isAuto && !$rawLogCheck.is(':checked')) {
         colorMe = true
       } else if (isLong && isAuto && _params.callNumber == 1) {
         colorMe = false
-        $brutlogcheck.prop('checked', true)
+        $rawLogCheck.prop('checked', true)
       } else if (!isLong && isAuto && _params.callNumber == 1) {
         colorMe = true
-        $brutlogcheck.prop('checked', false)
+        $rawLogCheck.prop('checked', false)
       }
 
       if (colorMe) {

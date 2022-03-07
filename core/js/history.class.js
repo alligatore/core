@@ -320,7 +320,7 @@ jeedom.history.drawChart = function(_params) {
       var seriesNumber = numSeries + 1
       if (seriesNumber <= 0 || seriesNumber > colorsNbr) seriesNumber = 1
       if (!isset(_params.option.graphColor) || _params.option.graphColor === undefined) {
-        _params.option.graphColor = colors[seriesNumber - 1]
+        _params.option.graphColor = colors[seriesNumber - 1];
       }
 
       //step/grouping according to cmd subType:
@@ -892,7 +892,7 @@ jeedom.history.drawChart = function(_params) {
           jeedom.history.chart[_params.el].containerId = jeedom.history.chart[_params.el].chart.container.id
           jeedom.history.chart[_params.el].chart._jeeId = _params.el //else only in useroptions
           jeedom.history.chart[_params.el].doing = 1
-
+          
           var options = {default: {}}
           if (isset(_params.yAxisScaling) && _params.yAxisScaling != '') options.default.yAxisScaling = _params.yAxisScaling
           if (isset(_params.yAxisByUnit) && _params.yAxisByUnit != '') options.default.yAxisByUnit = _params.yAxisByUnit
@@ -1014,7 +1014,7 @@ jeedom.history.initChart = function(_chartId, _options) {
   if (isset(_options.default.yAxisByUnit)) jeedom.history.default.yAxisByUnit = Boolean(Number(_options.default.yAxisByUnit))
 
   /*
-  HichCharts button states (undocumented):
+  HichChart button states (undocumented):
     0: normal
     1: hover
     2: selected
@@ -1144,6 +1144,7 @@ jeedom.history.initChart = function(_chartId, _options) {
     jeedom.history.chart[thisId].btToggleyaxisVisible
     ]
 }
+
 
 /*
 register legend context menu
@@ -1281,7 +1282,7 @@ jeedom.history.initLegendContextMenu = function(_chartId) {
 HighCharts events callbacks on load / addSeries / selection
 Decrement .doing and call chartDone when .doing == 0
 */
-jeedom.history.chartCallback = function(_chartId, _options) {
+jeedom.history.chartCallback  = function(_chartId, _options) {
   if (_chartId === undefined || !isset(_options)) return false
   if (jeedom.history.chart[_chartId].type == 'pie') return false
 
@@ -1326,8 +1327,8 @@ jeedom.history.chartDone = function(_chartId) {
           },
         }) //last redraw!
 
-        if (isset(jeeFrontEnd[jeedom.history.chart[_chartId].mode]) && typeof jeeFrontEnd[jeedom.history.chart[_chartId].mode].highcharts_done_callback === "function") {
-          jeeFrontEnd[jeedom.history.chart[_chartId].mode].highcharts_done_callback(_chartId)
+        if (typeof setChartOptions === "function") {
+          setChartOptions(_chartId)
         }
       }
     }, (getUrlVars('report') == 1) ? 0 : jeedom.history.chartDrawTime)
@@ -1461,7 +1462,7 @@ jeedom.history.setAxisScales = function(_chartId, _options) {
         }
       }
       units[unit].axis.push(axis.userOptions.id)
-
+      
       if (axis.series[0].data.length > 0) {
         var mathMin = Math.min.apply(Math, axis.series[0].data.filter(x => x !== null).map(function (key) { return key.options.y }))
         var mathMax = Math.max.apply(Math, axis.series[0].data.filter(x => x !== null).map(function (key) { return key.options.y }))
@@ -1492,8 +1493,8 @@ jeedom.history.setAxisScales = function(_chartId, _options) {
         axis.update({
           softMin: null,
           softMax: null,
-          min: units[unit].min > 0 ? 0 : units[unit].min,
-          max: units[unit].max < 0 ? 0 : units[unit].max,
+          min: null,
+          max: null,
           tickPositions: null
         }, false)
         axis.setExtremes(units[unit].min / 1.005,  units[unit].max * 1.005, false)
@@ -1533,8 +1534,8 @@ jeedom.history.setAxisScales = function(_chartId, _options) {
         axis.update({
           softMin: null,
           softMax: null,
-          min: min / 1.005,
-          max: max * 1.005,
+          min: null,
+          max: null,
           tickPositions: null
         }, false)
         axis.setExtremes(min / 1.005, max * 1.005, false)

@@ -1003,7 +1003,13 @@ function evaluate($_string) {
 	} else {
 		$c = 0;
 	}
-	$expr = preg_replace("/([^=<>!])=([^=])/", "$1==$2", $string); // Replace all '=' by '==' and avoid '==' '===' '>=' '<=' '!=' '!==' 
+	$expr = str_replace('==', '=', $string);
+	$expr = str_replace('=', '==', $expr);
+	$expr = str_replace('<==', '<=', $expr);
+	$expr = str_replace('>==', '>=', $expr);
+	$expr = str_replace('!==', '!=', $expr);
+	$expr = str_replace('!===', '!==', $expr);
+	$expr = str_replace('====', '===', $expr);
 	if ($c > 0) {
 		for ($i = 0; $i < $c; $i++) {
 			$expr = str_replace('--preparsed' . $i . '--', $matches[0][$i], $expr);

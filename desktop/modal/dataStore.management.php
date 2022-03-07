@@ -19,20 +19,15 @@ if (!isConnect()) {
   throw new Exception('{{401 - Accès non autorisé}}');
 }
 sendVarToJS([
-  'jeephp2js.md_dataStoreManagement_type' => init('type'),
-  'jeephp2js.md_dataStoreManagement_linkId' => init('link_id', -1)
+  'dataStore_type' => init('type'),
+  'dataStore_link_id' => init('link_id', -1)
 ]);
 ?>
 
-<div style="display: none;" id="div_dataStoreManagementAlert" data-modalType="md_datastore"></div>
+<div style="display: none;" id="div_dataStoreManagementAlert"></div>
 
-<div class="input-group">
-  <div class="input-group-btn">
-    <a id="bt_dataStoreManagementAdd" class="btn btn-sm btn-success roundedRight pull-right"><i class="fas fa-plus-circle"></i> {{Ajouter}}</a>
-    <a id="bt_dataStoreManagementRefresh" class="btn btn-sm roundedLeft pull-right"><i class="fas fa-sync-alt"></i> {{Rafraichir}}</a>
-  </div>
-</div>
-
+<a class="btn btn-xs btn-success pull-right" id="bt_dataStoreManagementAdd" style="margin-bottom: 5px;"><i class="fas fa-plus-circle"></i> {{Ajouter}}</a>
+<a class="btn btn-xs pull-right" id="bt_dataStoreManagementRefresh" style="margin-bottom: 5px;"><i class="fas fa-sync-alt"></i> {{Rafraichir}}</a>
 <table id="table_dataStore" class="table table-condensed table-bordered tablesorter stickyHead" style="width:100%; min-width:100%">
   <thead>
     <tr>
@@ -46,112 +41,17 @@ sendVarToJS([
   </tbody>
 </table>
 
-
 <script>
-"use strict"
+  "use strict"
 
-if (!jeeFrontEnd.md_datastore) {
-  jeeFrontEnd.md_datastore = {
-    init: function() {
-      this.$tableDataStore = $('#table_dataStore')
-      this.$modal = $('#md_modal')
-      this.refreshCount = 0
-    },
-    getDatastoreTr: function (_datastore = false) {
-      var thisTr = ''
-      thisTr += '<tr data-dataStore_id="' + (_datastore ? _datastore.id : '') + '">'
-      thisTr += '<td>'
-      if (_datastore) {
-        thisTr += '<span style="display : none;">' + _datastore.key + '</span><input class="form-control input-sm key" value="' + _datastore.key + '" readonly />'
-      } else {
-        thisTr += '<input class="form-control input-sm key" value="" />'
-      }
-      thisTr += '</td>'
-
-      thisTr += '<td>'
-      if (_datastore) {
-        try {
-          thisTr += '<span style="display : none;">' + _datastore.value + '</span><input class="form-control input-sm value" value="' + _datastore.value.replaceAll('\"', '&quot;') + '" />'
-        } catch {
-          thisTr += '<span style="display : none;">' + _datastore.value + '</span><input class="form-control input-sm value" value="' + _datastore.value + '" />'
-        }
-
-      } else {
-        thisTr += '<input class="form-control input-sm value" value="" />'
-      }
-      thisTr += '</td>'
-
-      thisTr += '<td>'
-      if (_datastore) {
-        for (var j in _datastore.usedBy.scenario) {
-          thisTr += ' <a href="' + _datastore.usedBy.scenario[j]['link'] + '&search=' + encodeURI(_datastore.key) + '" class="btn btn-xs btn-primary">' + _datastore.usedBy.scenario[j]['humanName'] + '</a>'
-        }
-        for (var j in _datastore.usedBy.eqLogic) {
-          thisTr += ' <a href="' + _datastore.usedBy.eqLogic[j]['link'] + '" class="btn btn-xs btn-primary">' + _datastore.usedBy.eqLogic[j]['humanName'] + '</a>'
-        }
-        for (var j in _datastore.usedBy.cmd) {
-          thisTr += ' <a href="' + _datastore.usedBy.cmd[j]['link'] + '" class="btn btn-xs btn-primary">' + _datastore.usedBy.cmd[j]['humanName'] + '</a>'
-        }
-        for (var j in _datastore.usedBy.interactDef) {
-          thisTr += ' <a href="' + _datastore.usedBy.interactDef[j]['link'] + '" class="btn btn-xs btn-primary">' + _datastore.usedBy.interactDef[j]['humanName'] + '</a>'
-        }
-      }
-      thisTr += '</td>'
-
-      thisTr += '<td>'
-      thisTr += '<a class="btn btn-info btn-xs bt_graphDataStore"><i class="fas fa-object-group"></i></a> '
-      thisTr += '<a class="btn btn-success btn-xs bt_saveDataStore"><i class="fas fa-check"></i></a> '
-      thisTr += '<a class="btn btn-danger btn-xs bt_removeDataStore"><i class="far fa-trash-alt"></i></a> '
-      thisTr += '</td>'
-      thisTr += '</tr>'
-      return thisTr
-    },
-    refreshDataStoreMangementTable: function() {
-      self = this
-      jeedom.dataStore.all({
-        type: jeephp2js.md_dataStoreManagement_type,
-        usedBy: 1,
-        error: function(error) {
-          $('#div_dataStoreManagementAlert').showAlert({
-            message: error.message,
-            level: 'danger'
-          })
-        },
-        success: function(data) {
-          self.$tableDataStore.find('tbody').empty()
-          var tr = ''
-          for (var i in data) {
-            tr += self.getDatastoreTr(data[i])
-          }
-          if (self.refreshCount == 0 && jeedom.getPageType() != 'modaldisplay') {
-            var varHeight = data.length * 31 + 220
-            self.$modal.dialog('open')
-            if (varHeight < self.$modal.height()) {
-              self.$modal.dialog({
-                height: varHeight
-              })
-            }
-          }
-
-          self.$tableDataStore.find('tbody').append(tr)
-          self.$tableDataStore.trigger("update")
-          self.refreshCount += 1
-        }
-      })
-    },
-  }
-}
-
-(function() {
-  $.hideAlert()
-  var jeeM = jeeFrontEnd.md_datastore
-  jeeM.init()
+  var $tableDataStore = $('#table_dataStore')
+  var $modal = $('#md_modal')
 
   $(function() {
     jeedomUtils.initTableSorter()
-    jeeM.refreshDataStoreMangementTable()
-    jeeM.$tableDataStore[0].config.widgetOptions.resizable_widths = ['150px', '150px', '', '90px']
-    jeeM.$tableDataStore.trigger('applyWidgets')
+    refreshDataStoreMangementTable()
+    $tableDataStore[0].config.widgetOptions.resizable_widths = ['150px', '150px', '', '90px']
+    $tableDataStore.trigger('applyWidgets')
       .trigger('resizableReset')
       .trigger('sorton', [
         [
@@ -160,7 +60,8 @@ if (!jeeFrontEnd.md_datastore) {
       ])
   })
 
-  jeeM.$tableDataStore.on({
+
+  $tableDataStore.on({
     'click': function(event) {
       var tr = $(this).closest('tr')
       if (tr.attr('data-datastore_id') == '') {
@@ -182,7 +83,7 @@ if (!jeeFrontEnd.md_datastore) {
                 message: '{{Dépôt de données supprimé}}',
                 level: 'success'
               })
-              jeeM.refreshDataStoreMangementTable()
+              refreshDataStoreMangementTable()
             }
           })
         }
@@ -190,15 +91,15 @@ if (!jeeFrontEnd.md_datastore) {
     }
   }, '.bt_removeDataStore')
 
-  jeeM.$tableDataStore.on({
+  $tableDataStore.on({
     'click': function(event) {
       var tr = $(this).closest('tr');
       jeedom.dataStore.save({
         id: tr.attr('data-dataStore_id'),
         value: tr.find('.value').value(),
-        type: jeephp2js.md_dataStoreManagement_type,
+        type: dataStore_type,
         key: tr.find('.key').value(),
-        link_id: jeephp2js.md_dataStoreManagement_linkId,
+        link_id: dataStore_link_id,
         error: function(error) {
           $('#div_dataStoreManagementAlert').showAlert({
             message: error.message,
@@ -210,13 +111,13 @@ if (!jeeFrontEnd.md_datastore) {
             message: '{{Dépôt de données sauvegardé}}',
             level: 'success'
           })
-          jeeM.refreshDataStoreMangementTable()
+          refreshDataStoreMangementTable()
         }
       })
     }
   }, '.bt_saveDataStore')
 
-  jeeM.$tableDataStore.on({
+  $tableDataStore.on({
     'click': function(event) {
       var tr = $(this).closest('tr')
       $('#md_modal2').dialog({
@@ -226,13 +127,98 @@ if (!jeeFrontEnd.md_datastore) {
   }, '.bt_graphDataStore')
 
   $('#bt_dataStoreManagementAdd').on('click', function() {
-    var tr = jeeM.getDatastoreTr()
-    jeeM.$tableDataStore.find('tbody').prepend(tr)
-    jeeM.$tableDataStore.trigger("update")
+    var tr = getDatastoreTr()
+    $tableDataStore.find('tbody').prepend(tr)
+    $tableDataStore.trigger("update")
   })
 
+  function getDatastoreTr(_datastore = false) {
+    var thisTr = ''
+    thisTr += '<tr data-dataStore_id="' + (_datastore ? _datastore.id : '') + '">'
+    thisTr += '<td>'
+    if (_datastore) {
+      thisTr += '<span style="display : none;">' + _datastore.key + '</span><input class="form-control input-sm key" value="' + _datastore.key + '" readonly />'
+    } else {
+      thisTr += '<input class="form-control input-sm key" value="" />'
+    }
+    thisTr += '</td>'
+
+    thisTr += '<td>'
+    if (_datastore) {
+      try {
+        thisTr += '<span style="display : none;">' + _datastore.value + '</span><input class="form-control input-sm value" value="' + _datastore.value.replaceAll('\"', '&quot;') + '" />'
+      } catch {
+        thisTr += '<span style="display : none;">' + _datastore.value + '</span><input class="form-control input-sm value" value="' + _datastore.value + '" />'
+      }
+
+    } else {
+      thisTr += '<input class="form-control input-sm value" value="" />'
+    }
+    thisTr += '</td>'
+
+    thisTr += '<td>'
+    if (_datastore) {
+      for (var j in _datastore.usedBy.scenario) {
+        thisTr += ' <a href="' + _datastore.usedBy.scenario[j]['link'] + '&search=' + encodeURI(_datastore.key) + '" class="btn btn-xs btn-primary">' + _datastore.usedBy.scenario[j]['humanName'] + '</a>'
+      }
+      for (var j in _datastore.usedBy.eqLogic) {
+        thisTr += ' <a href="' + _datastore.usedBy.eqLogic[j]['link'] + '" class="btn btn-xs btn-primary">' + _datastore.usedBy.eqLogic[j]['humanName'] + '</a>'
+      }
+      for (var j in _datastore.usedBy.cmd) {
+        thisTr += ' <a href="' + _datastore.usedBy.cmd[j]['link'] + '" class="btn btn-xs btn-primary">' + _datastore.usedBy.cmd[j]['humanName'] + '</a>'
+      }
+      for (var j in _datastore.usedBy.interactDef) {
+        thisTr += ' <a href="' + _datastore.usedBy.interactDef[j]['link'] + '" class="btn btn-xs btn-primary">' + _datastore.usedBy.interactDef[j]['humanName'] + '</a>'
+      }
+    }
+    thisTr += '</td>'
+
+    thisTr += '<td>'
+    thisTr += '<a class="btn btn-info btn-xs bt_graphDataStore"><i class="fas fa-object-group"></i></a> '
+    thisTr += '<a class="btn btn-success btn-xs bt_saveDataStore"><i class="fas fa-check"></i></a> '
+    thisTr += '<a class="btn btn-danger btn-xs bt_removeDataStore"><i class="far fa-trash-alt"></i></a> '
+    thisTr += '</td>'
+    thisTr += '</tr>'
+    return thisTr
+  }
+
   $('#bt_dataStoreManagementRefresh').off('click').on('click', function() {
-    jeeM.refreshDataStoreMangementTable();
-  })
-})()
+    refreshDataStoreMangementTable();
+  });
+
+  var refreshCount = 0
+
+  function refreshDataStoreMangementTable() {
+    jeedom.dataStore.all({
+      type: dataStore_type,
+      usedBy: 1,
+      error: function(error) {
+        $('#div_dataStoreManagementAlert').showAlert({
+          message: error.message,
+          level: 'danger'
+        })
+      },
+      success: function(data) {
+        $tableDataStore.find('tbody').empty()
+        var tr = ''
+        for (var i in data) {
+          tr += getDatastoreTr(data[i])
+        }
+        if (refreshCount == 0 && jeedom.getPageType() != 'modaldisplay') {
+          var varHeight = data.length * 31 + 170
+          $modal.dialog('open')
+          if (varHeight < $modal.height()) {
+            $modal.dialog({
+              height: varHeight
+            })
+          }
+        }
+
+        $tableDataStore.find('tbody').append(tr)
+        $tableDataStore.trigger("update")
+
+        refreshCount += 1
+      }
+    })
+  }
 </script>

@@ -36,7 +36,7 @@ class history {
 		$cmd_ids = DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
 		foreach ($cmd_ids as $cmd_id) {
 			$cmd = cmd::byId($cmd_id['cmd_id']);
-			if (!is_object($cmd) || $cmd->getType() != 'info') {
+			if (!is_object($cmd)) {
 				continue;
 			}
 			$values = array(
@@ -309,7 +309,7 @@ class history {
 			}
 		}
 		$sql .= ' FROM history
-		WHERE value is not null AND cmd_id=:cmd_id ';
+		WHERE cmd_id=:cmd_id ';
 		if ($_startTime !== null) {
 			$sql .= ' AND datetime>=:startTime';
 		}
@@ -352,7 +352,7 @@ class history {
 			}
 		}
 		$sql .= ' FROM historyArch
-		WHERE value is not null AND cmd_id=:cmd_id ';
+		WHERE cmd_id=:cmd_id ';
 		if ($_startTime !== null) {
 			$sql .= ' AND `datetime`>=:startTime';
 		}
@@ -879,7 +879,7 @@ class history {
 				if (count($matches[1]) != count($cmd_history)) {
 					continue;
 				}
-				$datetime = floatval(strtotime($datetime . ' UTC'));
+				$datetime = floatval(strtotime($datetime.' UTC'));
 				$calcul = template_replace($cmd_history, $_strcalcul);
 				if ($_noCalcul) {
 					$value[$datetime] = $calcul;
@@ -904,9 +904,6 @@ class history {
 	/*     * *********************Methode d'instance************************* */
 
 	public function save($_cmd = null, $_direct = false) {
-		if ($this->getValue() === null) {
-			return;
-		}
 		global $JEEDOM_INTERNAL_CONFIG;
 		if ($_cmd === null) {
 			$cmd = $this->getCmd();

@@ -11,11 +11,11 @@ Esto se divide en varias partes :
 Aquí es donde podrá ajustar diferentes parámetros de su perfil :
 
 - **Perfil**
-    - **Acceso** : Su inicio de sesión en el mercado, no se puede cambiar.
+    - **Iniciar sesión** : Su inicio de sesión en el mercado, no se puede cambiar.
     - **Apellido** : Su nombre (esta información solo es útil para hacer que los correos electrónicos sean más agradables).
     - **Primer nombre** : Su nombre (esta información solo es útil para hacer que los correos electrónicos sean más agradables).
     - **Nombre de usuario en el foro** : Tu nombre de usuario en el foro.
-    - **Correo electrónico** : Su email.
+    - **Email** : Su email.
     - **Lengua** : Tu idioma.
     - **Contraseña &amp;&amp; Confirmar contraseña** : Le permite cambiar su contraseña.
 
@@ -27,7 +27,7 @@ Para desarrolladores :
 Para los profesionales :
 - **Cuenta de correo electrónico del instalador** : Su correo electrónico de contacto profesional.
 - **Soporte de solicitudes de destinatario** : saber quién recibirá los correos electrónicos de soporte (cliente final, instalador o ambos).
-    - **TOS**
+    - **CGU**
 - **Usuario** : Condiciones generales de uso (tenga cuidado de leerlas porque lo comprometen).
 - **Revelador** : condiciones de uso para desarrolladores.
     - **Entradas**

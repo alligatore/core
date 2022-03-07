@@ -2,11 +2,6 @@
 
 $('body').attr('data-page', 'history')
 
-if (!jeeFrontEnd.history) {
-  jeeFrontEnd.history = {
-  }
-}
-
 var page_title = $('body').attr('data-objectName')
 var object_id = $('body').attr('data-object')
 var lastId = null

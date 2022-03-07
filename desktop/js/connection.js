@@ -16,17 +16,8 @@
 
 "use strict"
 
-if (!jeeFrontEnd.connection) {
-  jeeFrontEnd.connection = {
-    init: function() {
-      this.deepUrl = window.location.href
-      if (this.deepUrl.includes('logout')) this.deepUrl = ''
-      window.jeeP = this
-    },
-  }
-}
-
-jeeFrontEnd.connection.init()
+var deepUrl = window.location.href
+if (deepUrl.includes('logout')) deepUrl = ''
 
 $('#bt_login_validate').on('click', function() {
   jeedom.user.login({
@@ -57,8 +48,8 @@ $('#bt_login_validate').on('click', function() {
       } else {
         $('.veen').animateCss('bounceOut', function() {
           $('.veen').hide()
-          if (isset(jeeP.deepUrl) && jeeP.deepUrl.includes('index.php?v=d')) {
-            window.location.href = jeeP.deepUrl
+          if (isset(deepUrl) && deepUrl.includes('index.php?v=d')) {
+            window.location.href = deepUrl
           } else {
             window.location.href = 'index.php?v=d'
           }
@@ -194,8 +185,10 @@ $('#in_change_passwordToo').keypress(function(event) {
   }
 })
 
-$(function() {
-  $('#bootstrap_theme_css').attr('href', 'core/themes/core2019_Light/desktop/core2019_Light.css')
+// ADD //
+$(document).ready(function() {
+  var theme = 'core/themes/core2019_Light/desktop/core2019_Light.css'
+  $('#bootstrap_theme_css').attr('href', theme)
 
   document.title = JEEDOM_PRODUCT_NAME + ' - Login';
 
@@ -219,7 +212,10 @@ $(function() {
       }, 3000)
     }, 5000)
   }, 10000)
+
 })
+
+// Function //
 
 var marketdemande = function() {
   $('.veen .wrapper').removeClass('move')

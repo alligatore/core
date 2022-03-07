@@ -22,10 +22,10 @@ $object = jeeObject::byId(init('object_id'));
 if (!is_object($object)) {
   throw new Exception('Objet non trouvé : ' . init('object_id'));
 }
-sendVarToJS('jeephp2js.md_objectConfigure_objectInfo', utils::o2a($object));
+sendVarToJS('objectInfo', utils::o2a($object));
 ?>
 
-<div id="div_displayObjectConfigure" data-modalType="md_objectConfigure">
+<div id='div_displayObjectConfigure'>
   <legend>{{Informations}}</legend>
   <div class="row">
     <form class="form-horizontal">
@@ -57,5 +57,5 @@ sendVarToJS('jeephp2js.md_objectConfigure_objectInfo', utils::o2a($object));
 </div>
 
 <script>
-  $('#div_displayObjectConfigure').setValues(jeephp2js.md_objectConfigure_objectInfo, '.objectAttr')
+  $('#div_displayObjectConfigure').setValues(objectInfo, '.objectAttr')
 </script>

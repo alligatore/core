@@ -2,14 +2,6 @@
 
 $('body').attr('data-page', 'view')
 
-if (!jeeFrontEnd.view) {
-  jeeFrontEnd.view = {
-    init: function() {
-      window.jeeP = this
-    },
-  }
-}
-
 function initView(_view_id) {
   jeedom.view.all({
     error: function(error) {

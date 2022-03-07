@@ -2,7 +2,7 @@
 if (!isConnect('admin')) {
 	throw new Exception('{{401 - Accès non autorisé}}');
 }
-sendVarToJS('jeeFrontEnd.ldapEnable', config::byKey('ldap::enable'));
+sendVarToJS('ldapEnable', config::byKey('ldap::enable'));
 ?>
 
 <form class="form-horizontal">

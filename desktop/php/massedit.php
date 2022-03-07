@@ -41,7 +41,7 @@ foreach($typePossibilities as &$item) {
     }
   }
 }
-sendVarToJS('jeephp2js.typePossibilities', $typePossibilities);
+sendVarToJS('typePossibilities', $typePossibilities);
 
 function scanDB($_table) {
   global $excludeParams;

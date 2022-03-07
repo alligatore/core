@@ -43,6 +43,7 @@ try {
 					$plugin = plugin::byId($update->getLogicalId());
 					$infos['plugin'] = is_object($plugin) ? utils::o2a($plugin) : array();
 				} catch (Exception $e) {
+
 				}
 			}
 			if ($update->getType() == 'core') {
@@ -79,6 +80,7 @@ try {
 						$cron->start();
 					}
 				} catch (Exception $e) {
+
 				}
 				log::add('update', 'alert', __("[END UPDATE SUCCESS]", __FILE__));
 			}

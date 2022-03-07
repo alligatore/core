@@ -16,205 +16,32 @@
 
 "use strict"
 
-if (!jeeFrontEnd.editor) {
-  jeeFrontEnd.editor = {
-    hashRoot: 'l1_',
-    _elfInstance: null,
-    init: function() {
-      window.jeeP = this
-      this._elfInstance = null
-    },
-    setCommandCreatewidget: function(options) {
-      $('#bt_getHelpPage').attr('data-page','widgets')
-      //initiate widget options modal:
-      $("#md_widgetCreate").dialog({
-        closeText: '',
-        autoOpen: false,
-        modal: true,
-        height: 280,
-        width: 300,
-        open: function() {
-          $("body").css({overflow: 'hidden'})
-        },
-        beforeClose: function(event, ui) {
-          $("body").css({overflow: 'inherit'})
-        }
-      })
-
-      //button create inside options modal:
-      $('#bt_widgetCreate').off('click').on('click', function() {
-        if ($('#sel_widgetSubtype').value() == '') {
-          $.fn.showAlert({message: '{{Le sous-type ne peut être vide}}', level: 'danger'})
-          return
-        }
-        if ($('#in_widgetName').value() == '') {
-          $.fn.showAlert({message: '{{Le nom ne peut être vide}}', level: 'danger'})
-          return
-        }
-        var name = 'cmd.'+$('#sel_widgetType').value()+'.'+$('#sel_widgetSubtype').value()+'.'+$('#in_widgetName').value()+'.html'
-        var filePath = 'data/customTemplates/' + $('#sel_widgetVersion').value() + '/'
-        jeedom.createFile({
-          path: filePath,
-          name: name,
-          error: function(error) {
-            $.fn.showAlert({message: error.message, level: 'danger'})
-          },
-          success: function() {
-            $("#md_widgetCreate").dialog('close')
-            $.fn.showAlert({message: '{{Fichier enregistré avec succès}}', level: 'success'})
-            var hash = getHashFromPath(filePath.replace('data/customTemplates/', '').replace('/', ''))
-            jeeFrontEnd.editor._elfInstance.exec('open', hash)
-            //jeeFrontEnd.editor._elfInstance.exec('reload')
-
-            var path = filePath.replace('data/customTemplates/', '') + name
-            hash = getHashFromPath(path)
-            setTimeout(function() {
-              jeeFrontEnd.editor._elfInstance.exec('edit', hash)
-            }, 350)
-          }
-        })
-      })
-
-      //new custom command in elfinder:
-      elFinder.prototype._options.commands.push('jee_createWidget')
-      options.uiOptions.toolbar.push(['jee_createWidget'])
-
-      elFinder.prototype.commands.jee_createWidget = function() {
-        this.init = function() {
-            this.title = this.fm.i18n("{{Créer un Widget}}")
-        }
-        this.exec = function(hashes) {
-          $('#md_widgetCreate').dialog({title: "{{Options}}"}).dialog('open')
-          $('#sel_widgetType').trigger('change')
-
-          $("#md_widgetCreate").keydown(function (event) {
-              if (event.keyCode == $.ui.keyCode.ENTER) {
-                  $('#bt_widgetCreate').trigger('click')
-              }
-          })
-          return $.Deferred().done()
-        }
-        this.getstate = function() {
-          return 0
-        }
-      }
-
-      return options
-    },
-    setCommandCustom: function(options) {
-      $('#bt_getHelpPage').attr('data-page', 'custom')
-      //new custom command in elfinder:
-      elFinder.prototype._options.commands.push('jee_onoffcustom')
-      options.uiOptions.toolbar.push(['jee_onoffcustom'])
-      elFinder.prototype.commands.jee_onoffcustom = function() {
-        this.init = function() {
-          this.title = null
-          this.textOn = '{{Activé}}'
-          this.titleOn = '{{Personnalisation avancée active}}'
-          this.textOff = '{{Désactivé}}'
-          this.titleOff = '{{Personnalisation avancée inactive}}'
-          if (jeephp2js.customActive == '1') {
-            this.config = 1
-          } else {
-            this.config = 0
-          }
-          this.getActive()
-        }
-        this.exec = function(hashes) {
-          this.config = 1-this.config
-          //save config:
-          jeedom.config.save({
-            configuration: {
-              'enableCustomCss': this.config.toString()
-            },
-            error: function(error) {
-              $.fn.showAlert({
-                message: error.message,
-                level: 'danger'
-              })
-              this.config = 1-this.config
-            },
-            success: function(data) {
-              $.fn.showAlert({
-                message: '{{Configutation sauvegardée}}',
-                level: 'success'
-              })
-            }
-          })
-          this.getActive()
-          return $.Deferred().done()
-        }
-        this.getActive = function() {
-          var myClass = ''
-          var myIcon = ''
-          var $button = $('#elfinder .elfinder-button-icon-jee_onoffcustom + .elfinder-button-text')
-          try { $button.closest('.ui-state-default.tooltipstered').tooltipster('destroy') } catch (error) {}
-          if (this.config == 1) {
-            myClass = 'btn-warning'
-            myIcon = ' <i class="fas fa-toggle-on"></i>'
-            $button.attr('title', this.titleOn).text(this.textOn)
-          } else {
-            myClass = 'btn-success'
-            myIcon = ' <i class="fas fa-toggle-off"></i>'
-            $button.attr('title', this.titleOff).text(this.textOff)
-          }
-          $button.removeClass('btn-success btn-warning')
-            .addClass(myClass)
-            .append(myIcon)
-        }
-        this.getstate = function() {
-          return 0
-        }
-      }
-      return options
-    },
-    killTooltips: function() {
-      setTimeout(function() {
-      try {
-        $('.elfinder-workzone .tooltipstered').tooltipster('destroy')
-      } catch(error) {}
-      try {
-        $('.elfinder-workzone [title]').removeAttr('title')
-      } catch(error) {}
-      }, 500)
-    },
-    getHashFromPath: function(_path) {
-      return 'l1_' + btoa(_path).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '.').replace(/\.+$/, '')
-    }
-  }
-}
-
-jeeFrontEnd.editor.init()
+var _elfInstance
 
 $(function() {
   CodeMirror.modeURL = "3rdparty/codemirror/mode/%N/%N.js"
+
+  var hash = 'l1_'
+  var lang = jeedom_langage.substring(0, 2)
 
   var options = {
     url: 'core/php/editor.connector.php',
     baseUrl: '3rdparty/elfinder/',
     cssAutoLoad: false,
-    lang: jeeFrontEnd.language.substring(0, 2),
-    startPathHash: jeeP.hashRoot,
+    lang: lang,
+    startPathHash: hash,
     rememberLastDir: false,
     defaultView: 'list',
     sound: false,
     sort: 'kindDirsFirst',
     sortDirect: 'kindDirsFirst',
-    mimesCanMakeEmpty: {
-      "text/css": "css",
-      "text/html": "html",
-      "text/javascript": "js",
-      "application/javascript": "js",
-      "text/plain": "txt",
-      "text/x-php": "php"
-    },
+    fancyDateFormat: 'Y-m-d H:i',
+    dateFormat: 'Y-m-d H:i',
+    timeFormat: 'H:i',
     contextmenu: {
       cwd: ['reload', 'back', '|', 'upload', 'mkdir', 'mkfile', 'paste', '|', 'info'],
       files: ['cmdedit', 'edit', '|', 'rename' ,'|', 'getfile' , 'download', '|', 'copy', 'cut', 'paste', 'duplicate', '|','rm', '|', 'archive', 'extract', '|', 'info', 'places']
     },
-    fancyDateFormat: 'Y-m-d H:i',
-    dateFormat: 'Y-m-d H:i',
-    timeFormat: 'H:i',
     uiOptions: {
       toolbar: [
         ['back', 'forward'],
@@ -238,22 +65,20 @@ $(function() {
       },
       init: function(event, elfinderInstance)
       {
-        if (jeephp2js.editorType == 'custom') {
+        if (editorType == 'custom') {
           elfinderInstance._commands.jee_onoffcustom.getActive()
         }
-        jeeP.killTooltips()
+        killTooltips()
       },
       open: function(event, elfinderInstance)
       {
-        jeeP.killTooltips()
+        killTooltips()
       },
     },
     commandsOptions: {
       edit: {
         editors: [
           {
-            //mimes : ['text/html', 'text/javascript', 'application/javascript'],
-            //exts  : ['htm', 'html', 'xhtml', 'js'],
             info : {
               name : '{{Editer}}'
             },
@@ -327,7 +152,7 @@ $(function() {
             },
             save : function(textarea, editor) {
               textarea.value = this.myCodeMirror.getValue()
-              jeeP.killTooltips()
+              killTooltips()
               //this.myCodeMirror = null
             }
           }
@@ -337,31 +162,195 @@ $(function() {
   }
 
   //custom editor settings:
-  if (jeephp2js.editorType != '') {
+  if (editorType != '') {
     //remove places in toolbar:
     options.ui = ['toolbar', 'tree', 'path', 'stat']
 
-    if (jeephp2js.editorType == 'widget') {
-      options = jeeP.setCommandCreatewidget(options)
+    if (editorType == 'widget') {
+      options = setCommandCreatewidget(options)
       options.url = 'core/php/editor.connector.php?type=widget'
-      options.startPathHash = jeeP.getHashFromPath('data/customTemplates')
+      options.startPathHash = getHashFromPath('data/customTemplates')
     }
 
-    if (jeephp2js.editorType == 'custom') {
-      options = jeeP.setCommandCustom(options)
+    if (editorType == 'custom') {
+      options = setCommandCustom(options)
       options.url = 'core/php/editor.connector.php?type=custom'
-      options.startPathHash = jeeP.getHashFromPath('desktop/custom')
+      options.startPathHash = getHashFromPath('desktop/custom')
     }
   }
 
-  jeeP._elfInstance = $('#elfinder').elfinder(options).elfinder('instance')
+  _elfInstance = $('#elfinder').elfinder(options).elfinder('instance')
+  _elfInstance.mimesCanMakeEmpty = {
+    "text/css": "css",
+    "text/html": "html",
+    "text/javascript": "js",
+    "application/javascript": "js",
+    "text/plain": "txt",
+    "text/x-php": "php"
+  }
 
   $('#elfinder').css("height", $(window).height() - 50)
   $('.ui-state-default.elfinder-navbar.ui-resizable').css('height', '100%')
 })
+
+
+function setCommandCreatewidget(options) {
+  $('#bt_getHelpPage').attr('data-page','widgets')
+  //initiate widget options modal:
+  $("#md_widgetCreate").dialog({
+    closeText: '',
+    autoOpen: false,
+    modal: true,
+    height: 280,
+    width: 300,
+    open: function() {
+      $("body").css({overflow: 'hidden'})
+    },
+    beforeClose: function(event, ui) {
+      $("body").css({overflow: 'inherit'})
+    }
+  })
+
+  //button create inside options modal:
+  $('#bt_widgetCreate').off('click').on('click', function() {
+    if ($('#sel_widgetSubtype').value() == '') {
+      $.fn.showAlert({message: '{{Le sous-type ne peut être vide}}', level: 'danger'})
+      return
+    }
+    if ($('#in_widgetName').value() == '') {
+      $.fn.showAlert({message: '{{Le nom ne peut être vide}}', level: 'danger'})
+      return
+    }
+    var name = 'cmd.'+$('#sel_widgetType').value()+'.'+$('#sel_widgetSubtype').value()+'.'+$('#in_widgetName').value()+'.html'
+    var filePath = 'data/customTemplates/' + $('#sel_widgetVersion').value() + '/'
+    jeedom.createFile({
+      path : filePath,
+      name :name,
+      error: function(error) {
+        $.fn.showAlert({message: error.message, level: 'danger'})
+      },
+      success: function() {
+        $("#md_widgetCreate").dialog('close')
+        $.fn.showAlert({message: '{{Fichier enregistré avec succès}}', level: 'success'})
+        var hash = getHashFromPath(filePath.replace('data/customTemplates/', '').replace('/', ''))
+        _elfInstance.exec('open', hash)
+        //_elfInstance.exec('reload')
+
+        var path = filePath.replace('data/customTemplates/', '') + name
+        hash = getHashFromPath(path)
+        setTimeout(function() {
+          _elfInstance.exec('edit', hash)
+        }, 350)
+      }
+    })
+  })
+
+  //new custom command in elfinder:
+  elFinder.prototype._options.commands.push('jee_createWidget')
+  options.uiOptions.toolbar.push(['jee_createWidget'])
+
+  elFinder.prototype.commands.jee_createWidget = function() {
+    this.init = function() {
+        this.title = this.fm.i18n("{{Créer un Widget}}")
+    }
+    this.exec = function(hashes) {
+      $('#md_widgetCreate').dialog({title: "{{Options}}"}).dialog('open')
+      $('#sel_widgetType').trigger('change')
+
+      $("#md_widgetCreate").keydown(function (event) {
+          if (event.keyCode == $.ui.keyCode.ENTER) {
+              $('#bt_widgetCreate').trigger('click')
+          }
+      })
+      return $.Deferred().done()
+    }
+    this.getstate = function() {
+      return 0
+    }
+  }
+
+  return options
+}
+
+function setCommandCustom(options) {
+  $('#bt_getHelpPage').attr('data-page','custom')
+  //new custom command in elfinder:
+  elFinder.prototype._options.commands.push('jee_onoffcustom')
+  options.uiOptions.toolbar.push(['jee_onoffcustom'])
+  elFinder.prototype.commands.jee_onoffcustom = function() {
+    this.init = function() {
+      if (customActive == '1') {
+        this.config = 1
+      } else {
+        this.config = 0
+      }
+    }
+    this.exec = function(hashes) {
+      this.config = 1-this.config
+      //save config:
+      jeedom.config.save({
+        configuration: {
+          'enableCustomCss': this.config.toString()
+        },
+        error: function(error) {
+          $.fn.showAlert({
+            message: error.message,
+            level: 'danger'
+          })
+          this.config = 1-this.config
+        },
+        success: function(data) {
+          $.fn.showAlert({
+            message: '{{Configutation sauvegardée}}',
+            level: 'success'
+          })
+        }
+      })
+      this.getActive()
+      return $.Deferred().done()
+    }
+    this.getstate = function() {
+      return 0
+    }
+    this.getActive = function() {
+      var myClass = ''
+      var myIcon = ''
+      if (this.config == 1) {
+        this.title = this.fm.i18n("{{Activé}}")
+        myClass = 'btn-warning'
+        myIcon = ' <i class="fas fa-toggle-on"></i>'
+      } else {
+        this.title = this.fm.i18n("{{Désactivé}}")
+        myClass = 'btn-success'
+        myIcon = ' <i class="fas fa-toggle-off"></i>'
+      }
+      $('#elfinder .elfinder-button-icon-jee_onoffcustom + .elfinder-button-text')
+        .removeClass('btn-success btn-warning')
+        .addClass(myClass)
+        .text(this.title)
+        .append(myIcon)
+    }
+  }
+  return options
+}
+
+function killTooltips() {
+  setTimeout(function() {
+  try {
+    $('.elfinder-workzone .tooltipstered').tooltipster('destroy')
+  } catch(error) {}
+  try {
+    $('.elfinder-workzone [title]').removeAttr('title')
+  } catch(error) {}
+  }, 500)
+}
 
 //resize explorer in browser window:
 $(window).resize(function() {
   $('#elfinder').css("width", $(window).width())
   $('#elfinder').css("height", $(window).height() - 50)
 })
+
+function getHashFromPath(_path) {
+  return 'l1_' + btoa(_path).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '.').replace(/\.+$/, '')
+}

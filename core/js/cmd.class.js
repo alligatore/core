@@ -956,7 +956,7 @@ jeedom.cmd.displayActionsOption = function(_params) {
 };
 
 jeedom.cmd.normalizeName = function(_tagname) {
-  var cmdName = _tagname.toLowerCase().trim()
+  cmdName = _tagname.toLowerCase().trim()
   var cmdTests = []
   var cmdType = null
   var cmdList = {
@@ -1032,36 +1032,35 @@ jeedom.cmd.getDeadCmd = function(_params) {
 jeedom.cmd.formatMomentDuration = function(_duration) {
   var durationString = ''
   var used = 0
-  var lang = jeeFrontEnd.language
 
   if (_duration._data.years > 0) {
-    durationString += _duration._data.years + jeedom.config.locales[lang].duration.year
+    durationString += _duration._data.years + jeedom.config.locales[jeedom_langage].duration.year
     used++
   }
   if (_duration._data.months > 0) {
-    durationString += _duration._data.months + jeedom.config.locales[lang].duration.month
+    durationString += _duration._data.months + jeedom.config.locales[jeedom_langage].duration.month
     used++
   }
   if (_duration._data.days > 0) {
-    durationString += _duration._data.days + jeedom.config.locales[lang].duration.day
+    durationString += _duration._data.days + jeedom.config.locales[jeedom_langage].duration.day
     used++
   }
 
   if (used == 3) return durationString
   if (_duration._data.hours > 0) {
-    durationString += _duration._data.hours + jeedom.config.locales[lang].duration.hour
+    durationString += _duration._data.hours + jeedom.config.locales[jeedom_langage].duration.hour
     used++
   }
 
   if (used == 3) return durationString
   if (_duration._data.minutes > 0) {
-    durationString += _duration._data.minutes + jeedom.config.locales[lang].duration.minute
+    durationString += _duration._data.minutes + jeedom.config.locales[jeedom_langage].duration.minute
     used++
   }
 
   if (used == 3) return durationString
   if (_duration._data.seconds > 0) {
-    durationString += _duration._data.seconds + jeedom.config.locales[lang].duration.second
+    durationString += _duration._data.seconds + jeedom.config.locales[jeedom_langage].duration.second
     used++
   }
 
@@ -1070,9 +1069,9 @@ jeedom.cmd.formatMomentDuration = function(_duration) {
 
 jeedom.cmd.displayDuration = function(_date, _el, _type = 'duration') {
   if (_type == 'date') {
-    moment.locale(jeeFrontEnd.language.substring(0, 2))
-    if (isset(jeedom.config.locales[jeeFrontEnd.language].calendar)) {
-      var dateString = moment(_date, 'YYYY-MM-DD HH:mm:ss').calendar(jeedom.config.locales[jeeFrontEnd.language].calendar)
+    moment.locale(jeedom_langage.substring(0, 2))
+    if (isset(jeedom.config.locales[jeedom_langage].calendar)) {
+      var dateString = moment(_date, 'YYYY-MM-DD HH:mm:ss').calendar(jeedom.config.locales[jeedom_langage].calendar)
     } else {
       var dateString = moment(_date, 'YYYY-MM-DD HH:mm:ss').calendar(jeedom.config.locales['en_US'].calendar)
     }
@@ -1085,7 +1084,7 @@ jeedom.cmd.displayDuration = function(_date, _el, _type = 'duration') {
   }
 
   var tsDate = moment(_date).unix() * 1000
-  var now = Date.now() + ((new Date).getTimezoneOffset() + jeeFrontEnd.serverTZoffsetMin) * 60000 + jeeFrontEnd.clientServerDiffDatetime
+  var now = Date.now() + ((new Date).getTimezoneOffset() + serverTZoffsetMin) * 60000 + clientServerDiffDatetime
 
   var interval = 10000
   //_past more than one second ?
@@ -1099,7 +1098,7 @@ jeedom.cmd.displayDuration = function(_date, _el, _type = 'duration') {
     }
     var durationString = jeedom.cmd.formatMomentDuration(duration)
   } else {
-    var durationString = "0" + jeedom.config.locales[jeeFrontEnd.language].duration.second
+    var durationString = "0" + jeedom.config.locales[jeedom_langage].duration.second
   }
   _el.empty().append(durationString)
 

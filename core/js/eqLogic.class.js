@@ -461,7 +461,7 @@ jeedom.eqLogic.initGraphInfo = function(_eqLogicId) {
   var divGraph = $('div.eqLogic[data-eqlogic_id=' + _eqLogicId + '] div.eqlogicbackgraph')
   if (divGraph.length) {
     var cmdId = divGraph.data('cmdid')
-    $('div.eqLogic[data-eqlogic_id=' + _eqLogicId + '] div.cmd-widget[data-cmd_id="' + cmdId + '"] .cmdName').prepend('<span class="graphInfoCmd">• </span>')
+    $('div.eqLogic[data-eqlogic_id=' + _eqLogicId + '] div.cmd-widget[data-cmd_id="' + cmdId + '"] .cmdName').prepend('• ')
     setTimeout(function() {
       jeedom.eqLogic.drawGraphInfo(cmdId)
     }, 5)
@@ -506,7 +506,7 @@ jeedom.eqLogic.drawGraphInfo = function(_cmdId) {
     success: function(result) {
       if (result.data.length == 0) return false
       if (result.timelineOnly) return false
-      var now = (moment().unix() + (jeeFrontEnd.serverTZoffsetMin * 60)) * 1000
+      var now = (moment().unix() + (serverTZoffsetMin * 60)) * 1000
       var values = result.data.map(function(elt) {
         return elt[1]
       })

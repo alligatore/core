@@ -204,7 +204,7 @@ Returns all equipment belonging to the specified type (plugin)
 
 Settings:
 
--   thong type
+-   string type
 
 eqLogic::byObjectId
 -------------------
@@ -351,9 +351,9 @@ Settings:
 
 -   string eqType
 
--   thong order
+-   string order
 
--   thong type
+-   string type
 
 -   string subType
 
@@ -363,7 +363,7 @@ Settings:
 
 -   string unit = ''
 
--   array config
+-   array configuration
 
 -   array template
 
@@ -371,11 +371,11 @@ Settings:
 
 -   array html
 
--   intvalue=null
+-   int value = null
 
 -   int isVisible = 1
 
--   array-alert
+-   array alert
 
 cmd::event
 -------------------
@@ -465,9 +465,9 @@ Settings:
 
 -   string log : name of the log to retrieve
 
--   thong type : log type (debug, info, warning, error)
+-   string type : log type (debug, info, warning, error)
 
--   message string : text message to write
+-   string message : text message to write
 
 -   string logicalId : logicalId of the generated message
 
@@ -509,7 +509,7 @@ Get the value of a variable stored in the datastore
 
 Settings:
 
--   thong type : type of stored value (for scenarios it is scenario)
+-   string type : type of stored value (for scenarios it is scenario)
 
 -   id linkId : -1 for the global (value for the default scenarios, or the scenario id)
 
@@ -522,7 +522,7 @@ Stores the value of a variable in the datastore
 
 Settings:
 
--   thong type : type of stored value (for scenarios
+-   string type : type of stored value (for scenarios
     it's scenario)
 
 -   id linkId : -1 for global (value for default scenarios,
@@ -547,11 +547,11 @@ Allows to write in a log
 
 Settings:
 
--   thong type : log type (debug, info, warning, error)
+-   string type : log type (debug, info, warning, error)
 
--   message string : message
+-   string message : message
 
--   thong action : action
+-   string action : action
 
 -   string logicalId : logicalId
 
@@ -767,7 +767,7 @@ JSON API Examples
 =================
 
 Here is an example of using the API. For the example below
-I use [this php class](https://github.com/jeedom/core/blob/release/core/class/jsonrpcClient.class.php)
+i use [this php class](https://github.com/jeedom/core/blob/release/core/class/jsonrpcClient.class.php)
 which simplifies the use of the API.
 
 Retrieving the list of objects :

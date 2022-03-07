@@ -22,7 +22,7 @@ $scenario = scenario::byId(init('id'));
 if (!is_object($scenario)) {
   throw new Exception(__('Aucun scénario ne correspondant à :', __FILE__) . ' ' . init('id'));
 }
-sendVarToJs('jeephp2js.md_scenarioJsonEdit_scId', init('id'));
+sendVarToJs('scenarioJsonEdit_scenario_id', init('id'));
 include_file('3rdparty', 'codemirror/addon/selection/active-line', 'js');
 include_file('3rdparty', 'codemirror/addon/search/search', 'js');
 include_file('3rdparty', 'codemirror/addon/search/searchcursor', 'js');
@@ -37,7 +37,7 @@ include_file('3rdparty', 'codemirror/addon/fold/foldgutter', 'js');
 include_file('3rdparty', 'codemirror/addon/fold/foldgutter', 'css');
 ?>
 
-<div id="div_alertScenarioJsonEdit" data-modalType="md_scenarioJsonEdit"></div>
+<div id="div_alertScenarioJsonEdit"></div>
 <a class="btn btn-success btn-sm pull-right" id="bt_saveSummaryScenario"><i class="fas fa-check-circle"></i> {{Sauvegarder}}</a>
 <br/><br/>
 <textarea id="ta_scenarioJsonEdit_scenario">
@@ -82,7 +82,7 @@ $('#bt_saveSummaryScenario').on('click', function() {
     return
   }
   var scenario = {
-    id : jeephp2js.md_scenarioJsonEdit_scId,
+    id : scenarioJsonEdit_scenario_id,
     elements : json_decode(fileEditor.getValue())
   };
   jeedom.scenario.save({
@@ -93,7 +93,7 @@ $('#bt_saveSummaryScenario').on('click', function() {
     success: function(data) {
       $('#div_alertScenarioJsonEdit').showAlert({message: '{{Sauvegarde réussie}}', level: 'success'})
       if (typeof printScenario === "function") {
-        printScenario(jeephp2js.md_scenarioJsonEdit_scId)
+        printScenario(scenarioJsonEdit_scenario_id)
       }
     }
   })
